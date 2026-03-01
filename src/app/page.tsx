@@ -138,7 +138,14 @@ export default function Home() {
         setCurrentSessionId(res.data.sessionId);
         if (user) loadSessions(user.id);
       }
-    } catch (err) { alert("Server error"); } finally { setLoading(false); }
+    } catch (err: any) { 
+      // ADVANCED ERROR LOGGING
+      console.error("Server Error Full Details:", err.response?.data);
+      const errorMsg = err.response?.data?.details || err.response?.data?.error || "Connection Failed";
+      alert(`API Error: ${errorMsg}`); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   const handleDigDeeper = () => {
