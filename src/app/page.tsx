@@ -11,7 +11,7 @@ import {
   BookOpen, Plus, MessageSquare, FileDown,
   FileJson, KeyRound, Trash2, LayoutPanelLeft, PenLine,
   Mic, MicOff, Eraser, Type, Zap, Sun, Moon, Maximize2, Minimize2, Telescope,
-  Volume2, VolumeX, AlertTriangle
+  Volume2, VolumeX, AlertTriangle, Menu, X // <-- Menu aur X icons add kiye hain
 } from 'lucide-react';
 
 // --- CUSTOM GOOGLE LOGIN BUTTON COMPONENT ---
@@ -35,6 +35,7 @@ export default function Home() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [bookDraft, setBookDraft] = useState<string>("");
   const [isDraftOpen, setIsDraftOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // <-- Mobile sidebar state
   const [input, setInput] = useState('');
   const [user, setUser] = useState<{name: string, id: string} | null>(null);
   const [loading, setLoading] = useState(false);
@@ -76,6 +77,7 @@ export default function Home() {
 
   const loadSessionHistory = async (sessionId: string) => {
     setLoading(true);
+    setIsSidebarOpen(false); // <-- Mobile par session load hone ke baad sidebar band ho jaye
     try {
       const res = await axios.get(`https://muse-backend-qy5z.onrender.com/api/history/${sessionId}`);
       setCurrentSessionId(sessionId);
@@ -139,7 +141,6 @@ export default function Home() {
         if (user) loadSessions(user.id);
       }
     } catch (err: any) { 
-      // ADVANCED ERROR LOGGING
       console.error("Server Error Full Details:", err.response?.data);
       const errorMsg = err.response?.data?.details || err.response?.data?.error || "Connection Failed";
       alert(`API Error: ${errorMsg}`); 
@@ -200,11 +201,11 @@ export default function Home() {
     setCurrentSessionId(null);
     setBookDraft("");
     setInput("");
+    setIsSidebarOpen(false); // <-- Mobile par new chat ke baad sidebar band
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     setSpeakingIndex(null);
   };
 
-  // --- REGULAR EMAIL LOGIN ---
   const handleAuth = async () => {
     try {
       if (isReset) {
@@ -223,7 +224,6 @@ export default function Home() {
     } catch (err) { alert("Auth failed"); }
   };
 
-  // --- GOOGLE LOGIN HANDLER ---
   const handleGoogleAuth = async (accessToken: string) => {
     try {
       const res = await axios.post('https://muse-backend-qy5z.onrender.com/api/auth/google', { token: accessToken });
@@ -260,233 +260,256 @@ export default function Home() {
   };
 
   return (
-    <div className={`flex h-screen ${themeClasses.bg} ${themeClasses.text} font-sans transition-colors duration-300 overflow-hidden`}>
+    <div className={`flex h-[100dvh] ${themeClasses.bg} ${themeClasses.text} font-sans transition-colors duration-300 overflow-hidden relative`}>
       
-      {!zenMode && (
-        <aside className={`w-80 ${themeClasses.sidebar} border-r ${themeClasses.border} flex flex-col p-6 hidden md:flex transition-all`}>
-          <div className="flex items-center gap-3 mb-8">
+      {/* --- RESPONSIVE SIDEBAR --- */}
+      {/* Mobile Background Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar Box */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-72 md:w-80 ${themeClasses.sidebar} border-r ${themeClasses.border} flex flex-col p-6 transition-transform duration-300 ease-in-out transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 ${zenMode ? 'hidden' : 'flex'}`}>
+        
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
             <div className="bg-blue-600 p-2 rounded-xl text-white shadow-md shadow-blue-500/30">
                 <Sparkles size={20} className="fill-white" />
             </div>
             <h1 className="font-black text-2xl tracking-tighter text-blue-600">MUSE</h1>
           </div>
-
-          <button onClick={startNewChat} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-2xl transition mb-8 font-bold shadow-lg shadow-blue-500/20 active:scale-95">
-            <Plus size={20}/> New Masterpiece
+          {/* Mobile close button */}
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden p-2 text-gray-400 hover:text-red-500 transition">
+            <X size={24} />
           </button>
-          
-          <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-            <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest px-2 mb-3 flex items-center gap-2">
-                <Zap size={12} className="text-yellow-500" /> Your Library
-            </p>
-            {sessions.map((s, i) => (
-              <div key={i} className="group relative">
-                <button
-                  onClick={() => loadSessionHistory(s.sessionId)}
-                  className={`flex items-center gap-3 p-3 w-full rounded-xl text-left text-sm transition font-medium ${currentSessionId === s.sessionId ? 'bg-blue-50 text-blue-600 border border-blue-100' : `hover:bg-black/5 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}`}
-                >
-                  <MessageSquare size={16} className={currentSessionId === s.sessionId ? "text-blue-500" : "text-gray-400"} />
-                  <span className="truncate">{s.content}</span>
-                </button>
-                <Trash2 onClick={(e: React.MouseEvent) => deleteSession(e, s.sessionId)} size={14} className="absolute right-3 top-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition cursor-pointer" />
-              </div>
-            ))}
-            {!user && (
-                <div className="p-4 mt-4 bg-blue-50 dark:bg-[#1c2128] rounded-xl border border-blue-100 dark:border-gray-800 text-center">
-                    <p className="text-xs text-blue-600 dark:text-blue-400 font-bold">Login to save your library</p>
-                </div>
-            )}
-          </div>
-
-          <div className="mt-auto space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex gap-2">
-                <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border ${themeClasses.border} bg-white dark:bg-[#161b22] shadow-sm hover:shadow-md transition`}>
-                    {theme === 'dark' ? <Sun size={18} className="text-yellow-500" /> : <Moon size={18} className="text-blue-500" />}
-                </button>
-                {user ? (
-                    <button onClick={() => {localStorage.clear(); window.location.reload();}} className={`p-3 rounded-xl border ${themeClasses.border} bg-white dark:bg-[#161b22] shadow-sm hover:shadow-md hover:text-red-500 transition`} title="Logout">
-                        <LogOut size={18}/>
-                    </button>
-                ) : (
-                    <button onClick={() => setShowAuth(true)} className={`p-3 px-4 rounded-xl border ${themeClasses.border} bg-white dark:bg-[#161b22] text-xs font-bold uppercase text-blue-600 shadow-sm hover:shadow-md transition`} title="Login">
-                        Login
-                    </button>
-                )}
-            </div>
-          </div>
-        </aside>
-      )}
-
-      <div className="flex-1 flex relative">
-        <div className={`flex flex-col transition-all duration-500 ${isDraftOpen ? 'w-1/2' : 'w-full'}`}>
-          <header className={`p-5 border-b ${themeClasses.border} flex justify-between items-center ${themeClasses.bg} z-10 shadow-sm shadow-black/5`}>
-            <div className="flex items-center gap-4">
-                <button onClick={() => setZenMode(!zenMode)} className={`p-2 rounded-lg ${themeClasses.iconHover} text-gray-500 transition`}>
-                    {zenMode ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-                </button>
-                <select
-                    value={writingMode}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setWritingMode(e.target.value)}
-                    className={`bg-transparent border ${themeClasses.border} text-xs font-bold uppercase rounded-lg px-3 py-1.5 outline-none cursor-pointer focus:border-blue-500 text-gray-500`}
-                >
-                    <option className="text-black">Creative</option>
-                    <option className="text-black">Professional</option>
-                    <option className="text-black">Dramatic</option>
-                    <option className="text-black">Mystery</option>
-                </select>
-            </div>
-            <button onClick={() => setIsDraftOpen(!isDraftOpen)} className={`flex items-center gap-2 p-2.5 rounded-xl transition font-bold text-xs uppercase tracking-wider ${isDraftOpen ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
-              <LayoutPanelLeft size={18} />
-              <span className="hidden md:block">{isDraftOpen ? 'Close Draft' : 'Open Draft'}</span>
-            </button>
-          </header>
-
-          <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 space-y-8 scroll-smooth">
-            {messages.length === 0 && (
-              <div className="h-full flex flex-col items-center justify-center opacity-40 text-center select-none">
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-full mb-6">
-                    <BookOpen size={64} className="text-blue-500" />
-                </div>
-                <h2 className="text-3xl italic font-serif text-gray-800 dark:text-gray-300">"Let's write your story..."</h2>
-                <p className="mt-3 text-sm font-sans uppercase tracking-widest text-gray-500">I will interview you and write the book.</p>
-              </div>
-            )}
-            
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`p-6 rounded-[2rem] max-w-[85%] leading-relaxed text-[1.1rem] transition-all relative group ${
-                  m.role === 'user' ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-none shadow-lg shadow-blue-500/20' : `${themeClasses.chatAi} rounded-tl-none text-gray-700 dark:text-gray-300`
-                }`}>
-                  <div className="prose dark:prose-invert max-w-none">
-                    <ReactMarkdown>{m.text}</ReactMarkdown>
-                  </div>
-                  
-                  {m.role === 'ai' && (
-                    <button
-                      onClick={() => handleSpeak(m.text, i)}
-                      className="mt-4 flex items-center gap-2 text-[10px] font-bold text-gray-400 hover:text-blue-500 transition uppercase tracking-widest border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-full hover:bg-blue-50 dark:hover:bg-gray-800"
-                    >
-                      {speakingIndex === i ? (
-                        <><VolumeX size={14} className="text-red-500"/> Stop Reading</>
-                      ) : (
-                        <><Volume2 size={14} className="text-blue-500"/> Listen</>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-            {loading && (
-              <div className="flex items-center gap-3 text-blue-500 italic text-sm ml-6 font-medium animate-pulse">
-                <Loader2 className="animate-spin" size={16} /> Muse is writing & thinking...
-              </div>
-            )}
-            <div ref={scrollRef} />
-          </main>
-
-          <footer className={`p-6 md:p-8 lg:px-12 ${themeClasses.bg} border-t ${themeClasses.border}`}>
-            
-            {!user && messages.length > 0 && (
-              <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 text-yellow-800 dark:text-yellow-500 text-xs md:text-sm font-bold px-4 py-3 rounded-2xl mb-4 flex justify-between items-center shadow-sm">
-                <span className="flex items-center gap-2"><AlertTriangle size={16} /> You are chatting as a Guest. Login to save your draft and history!</span>
-                <button onClick={() => setShowAuth(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl transition uppercase tracking-wider text-[10px]">Login Now</button>
-              </div>
-            )}
-
-            {messages.length > 0 && (
-                <div className="flex gap-2 mb-4">
-                    <button onClick={handleDigDeeper} className="flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 text-gray-500 text-xs font-bold uppercase px-5 py-2.5 rounded-full transition-all border shadow-sm border-gray-200 dark:border-gray-700">
-                        <Telescope size={14}/> Ask me to Dig Deeper
-                    </button>
-                </div>
-            )}
-            <div className="relative flex items-center gap-4">
-              <button
-                onClick={toggleListening}
-                className={`p-4 rounded-2xl transition-all border ${themeClasses.border} shadow-sm ${isListening ? 'bg-red-50 border-red-200 text-red-500 animate-pulse' : 'bg-white dark:bg-[#161b22] text-gray-400 hover:text-blue-500 hover:border-blue-200'}`}
-              >
-                {isListening ? <Mic size={24}/> : <MicOff size={24}/>}
-              </button>
-              
-              <textarea
-                className={`flex-1 ${themeClasses.input} border-2 ${themeClasses.border} rounded-3xl p-5 pr-16 outline-none focus:border-blue-400 transition-all text-lg shadow-sm resize-none custom-scrollbar placeholder:text-gray-400 dark:placeholder:text-gray-600`}
-                placeholder={isListening ? "Listening carefully..." : "Tell me your memories... (Shift + Enter for new line)"}
-                value={input}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
-                onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                rows={1}
-                style={{ minHeight: '68px', maxHeight: '200px' }}
-              />
-
-              <button onClick={() => handleSend()} className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 shadow-md shadow-blue-500/30 active:scale-95 transition-all">
-                <Send size={20}/>
-              </button>
-            </div>
-          </footer>
         </div>
 
-        {isDraftOpen && (
-          <div className={`w-1/2 flex flex-col animate-in slide-in-from-right duration-500 bg-white dark:bg-[#0d1117] border-l ${themeClasses.border} shadow-2xl`}>
-            <header className={`p-5 border-b ${themeClasses.border} flex justify-between items-center bg-[#fcfcfc] dark:bg-[#161b22]`}>
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-lg">
-                    <PenLine size={18} className="text-blue-600"/>
-                </div>
-                <h2 className="font-bold text-xs text-gray-600 dark:text-gray-400 uppercase tracking-widest">Manuscript</h2>
-              </div>
-              <div className="flex items-center gap-1">
-                <button onClick={downloadPDF} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition" title="Export PDF"><FileDown size={18}/></button>
-                <button onClick={downloadTXT} className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 transition" title="Export Text"><FileJson size={18}/></button>
-                <div className="w-[1px] h-4 bg-gray-300 dark:bg-gray-700 mx-2"></div>
-                <button onClick={() => setBookDraft("")} className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-red-500 transition" title="Clear Draft"><Eraser size={18}/></button>
-              </div>
-            </header>
-            <div className="flex-1 p-12 md:p-16 overflow-y-auto custom-scrollbar">
-                <textarea
-                className={`w-full h-full bg-transparent outline-none resize-none font-serif text-[1.35rem] leading-[2.2] transition-all text-gray-800 dark:text-gray-300 placeholder:text-gray-300 dark:placeholder:text-gray-700`}
-                placeholder="As you answer my questions, your book will automatically be written and formatted here..."
-                value={bookDraft}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBookDraft(e.target.value)}
-                />
+        <button onClick={startNewChat} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-2xl transition mb-8 font-bold shadow-lg shadow-blue-500/20 active:scale-95">
+          <Plus size={20}/> New Masterpiece
+        </button>
+        
+        <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+          <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest px-2 mb-3 flex items-center gap-2">
+              <Zap size={12} className="text-yellow-500" /> Your Library
+          </p>
+          {sessions.map((s, i) => (
+            <div key={i} className="group relative">
+              <button
+                onClick={() => loadSessionHistory(s.sessionId)}
+                className={`flex items-center gap-3 p-3 w-full rounded-xl text-left text-sm transition font-medium ${currentSessionId === s.sessionId ? 'bg-blue-50 text-blue-600 border border-blue-100' : `hover:bg-black/5 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}`}
+              >
+                <MessageSquare size={16} className={currentSessionId === s.sessionId ? "text-blue-500" : "text-gray-400"} />
+                <span className="truncate">{s.content}</span>
+              </button>
+              <Trash2 onClick={(e: React.MouseEvent) => deleteSession(e, s.sessionId)} size={14} className="absolute right-3 top-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition cursor-pointer" />
             </div>
+          ))}
+          {!user && (
+              <div className="p-4 mt-4 bg-blue-50 dark:bg-[#1c2128] rounded-xl border border-blue-100 dark:border-gray-800 text-center">
+                  <p className="text-xs text-blue-600 dark:text-blue-400 font-bold">Login to save your library</p>
+              </div>
+          )}
+        </div>
+
+        <div className="mt-auto space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex gap-2">
+              <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border ${themeClasses.border} bg-white dark:bg-[#161b22] shadow-sm hover:shadow-md transition`}>
+                  {theme === 'dark' ? <Sun size={18} className="text-yellow-500" /> : <Moon size={18} className="text-blue-500" />}
+              </button>
+              {user ? (
+                  <button onClick={() => {localStorage.clear(); window.location.reload();}} className={`p-3 rounded-xl border ${themeClasses.border} bg-white dark:bg-[#161b22] shadow-sm hover:shadow-md hover:text-red-500 transition`} title="Logout">
+                      <LogOut size={18}/>
+                  </button>
+              ) : (
+                  <button onClick={() => setShowAuth(true)} className={`p-3 px-4 rounded-xl border ${themeClasses.border} bg-white dark:bg-[#161b22] text-xs font-bold uppercase text-blue-600 shadow-sm hover:shadow-md transition`} title="Login">
+                      Login
+                  </button>
+              )}
           </div>
-        )}
+        </div>
+      </aside>
+
+      {/* --- MAIN CHAT AREA --- */}
+      {/* Note: Hidden on mobile IF Draft is open, taake Draft ko poori space mil sakay */}
+      <div className={`flex-1 flex-col transition-all duration-500 ${isDraftOpen ? 'hidden md:flex md:w-1/2' : 'flex w-full'}`}>
+        <header className={`p-3 md:p-5 border-b ${themeClasses.border} flex justify-between items-center ${themeClasses.bg} z-10 shadow-sm shadow-black/5`}>
+          <div className="flex items-center gap-2 md:gap-4">
+              {/* Mobile Hamburger Icon */}
+              {!zenMode && (
+                <button onClick={() => setIsSidebarOpen(true)} className={`md:hidden p-2 rounded-lg ${themeClasses.iconHover} text-gray-500 transition`}>
+                  <Menu size={24} />
+                </button>
+              )}
+              <button onClick={() => setZenMode(!zenMode)} className={`hidden md:block p-2 rounded-lg ${themeClasses.iconHover} text-gray-500 transition`}>
+                  {zenMode ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+              </button>
+              <select
+                  value={writingMode}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setWritingMode(e.target.value)}
+                  className={`bg-transparent border ${themeClasses.border} text-[10px] md:text-xs font-bold uppercase rounded-lg px-2 py-1.5 md:px-3 md:py-1.5 outline-none cursor-pointer focus:border-blue-500 text-gray-500`}
+              >
+                  <option className="text-black">Creative</option>
+                  <option className="text-black">Professional</option>
+                  <option className="text-black">Dramatic</option>
+                  <option className="text-black">Mystery</option>
+              </select>
+          </div>
+          <button onClick={() => setIsDraftOpen(!isDraftOpen)} className={`flex items-center gap-2 p-2 md:p-2.5 rounded-xl transition font-bold text-[10px] md:text-xs uppercase tracking-wider ${isDraftOpen ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+            <LayoutPanelLeft size={16} className="md:w-[18px] md:h-[18px]" />
+            <span className="md:block">{isDraftOpen ? 'Close Draft' : 'Open Draft'}</span>
+          </button>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-3 md:p-8 lg:p-12 space-y-6 md:space-y-8 scroll-smooth">
+          {messages.length === 0 && (
+            <div className="h-full flex flex-col items-center justify-center opacity-40 text-center select-none p-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 md:p-6 rounded-full mb-4 md:mb-6">
+                  <BookOpen size={48} className="text-blue-500 md:w-[64px] md:h-[64px]" />
+              </div>
+              <h2 className="text-xl md:text-3xl italic font-serif text-gray-800 dark:text-gray-300">"Let's write your story..."</h2>
+              <p className="mt-2 md:mt-3 text-xs md:text-sm font-sans uppercase tracking-widest text-gray-500">I will interview you and write the book.</p>
+            </div>
+          )}
+          
+          {messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`p-4 md:p-6 rounded-2xl md:rounded-[2rem] max-w-[92%] md:max-w-[85%] text-[0.95rem] md:text-[1.1rem] leading-relaxed transition-all relative group ${
+                m.role === 'user' ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-none shadow-lg shadow-blue-500/20' : `${themeClasses.chatAi} rounded-tl-none text-gray-700 dark:text-gray-300`
+              }`}>
+                <div className="prose dark:prose-invert max-w-none">
+                  <ReactMarkdown>{m.text}</ReactMarkdown>
+                </div>
+                
+                {m.role === 'ai' && (
+                  <button
+                    onClick={() => handleSpeak(m.text, i)}
+                    className="mt-3 md:mt-4 flex items-center gap-1.5 md:gap-2 text-[9px] md:text-[10px] font-bold text-gray-400 hover:text-blue-500 transition uppercase tracking-widest border border-gray-200 dark:border-gray-700 px-2.5 py-1.5 rounded-full hover:bg-blue-50 dark:hover:bg-gray-800 w-max"
+                  >
+                    {speakingIndex === i ? (
+                      <><VolumeX size={12} className="md:w-[14px] md:h-[14px] text-red-500"/> Stop Reading</>
+                    ) : (
+                      <><Volume2 size={12} className="md:w-[14px] md:h-[14px] text-blue-500"/> Listen</>
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="flex items-center gap-2 md:gap-3 text-blue-500 italic text-xs md:text-sm ml-2 md:ml-6 font-medium animate-pulse">
+              <Loader2 className="animate-spin" size={14} className="md:w-[16px] md:h-[16px]" /> Muse is writing & thinking...
+            </div>
+          )}
+          <div ref={scrollRef} />
+        </main>
+
+        <footer className={`p-3 md:p-6 lg:px-12 ${themeClasses.bg} border-t ${themeClasses.border}`}>
+          
+          {!user && messages.length > 0 && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 text-yellow-800 dark:text-yellow-500 text-[10px] md:text-sm font-bold px-3 py-2.5 md:px-4 md:py-3 rounded-xl md:rounded-2xl mb-3 md:mb-4 flex justify-between items-center shadow-sm">
+              <span className="flex items-center gap-1.5 md:gap-2"><AlertTriangle size={14} className="md:w-[16px] md:h-[16px]" /> You are chatting as a Guest.</span>
+              <button onClick={() => setShowAuth(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl transition uppercase tracking-wider text-[9px] md:text-[10px]">Login</button>
+            </div>
+          )}
+
+          {messages.length > 0 && (
+              <div className="flex gap-2 mb-3 md:mb-4">
+                  <button onClick={handleDigDeeper} className="flex items-center justify-center gap-1.5 md:gap-2 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 text-gray-500 text-[10px] md:text-xs font-bold uppercase px-4 py-2 md:px-5 md:py-2.5 rounded-full transition-all border shadow-sm border-gray-200 dark:border-gray-700 w-full md:w-auto">
+                      <Telescope size={14}/> Ask me to Dig Deeper
+                  </button>
+              </div>
+          )}
+          <div className="relative flex items-center gap-2 md:gap-4">
+            <button
+              onClick={toggleListening}
+              className={`p-3 md:p-4 rounded-xl md:rounded-2xl transition-all border ${themeClasses.border} shadow-sm ${isListening ? 'bg-red-50 border-red-200 text-red-500 animate-pulse' : 'bg-white dark:bg-[#161b22] text-gray-400 hover:text-blue-500 hover:border-blue-200'}`}
+            >
+              {isListening ? <Mic size={20} className="md:w-[24px] md:h-[24px]" /> : <MicOff size={20} className="md:w-[24px] md:h-[24px]" />}
+            </button>
+            
+            <textarea
+              className={`flex-1 ${themeClasses.input} border-2 ${themeClasses.border} rounded-2xl md:rounded-3xl p-3 md:p-5 pr-12 md:pr-16 outline-none focus:border-blue-400 transition-all text-sm md:text-lg shadow-sm resize-none custom-scrollbar placeholder:text-gray-400 dark:placeholder:text-gray-600`}
+              placeholder={isListening ? "Listening..." : "Tell me your memories..."}
+              value={input}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
+              onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              rows={1}
+              style={{ minHeight: '52px', maxHeight: '150px' }}
+            />
+
+            <button onClick={() => handleSend()} className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-2.5 md:p-3 bg-blue-600 text-white rounded-xl md:rounded-2xl hover:bg-blue-700 shadow-md shadow-blue-500/30 active:scale-95 transition-all">
+              <Send size={16} className="md:w-[20px] md:h-[20px]" />
+            </button>
+          </div>
+        </footer>
       </div>
 
+      {/* --- RESPONSIVE DRAFT PANEL --- */}
+      {/* Mobile par full width, Desktop par w-1/2 */}
+      <div className={`fixed inset-0 z-40 w-full md:static md:w-1/2 flex flex-col transition-transform duration-500 bg-white dark:bg-[#0d1117] border-l ${themeClasses.border} shadow-2xl ${isDraftOpen ? 'translate-x-0' : 'translate-x-full md:hidden'}`}>
+        <header className={`p-3 md:p-5 border-b ${themeClasses.border} flex justify-between items-center bg-[#fcfcfc] dark:bg-[#161b22] mt-[env(safe-area-inset-top)]`}>
+          <div className="flex items-center gap-2 md:gap-3">
+            <button onClick={() => setIsDraftOpen(false)} className="md:hidden p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+              <X size={20} />
+            </button>
+            <div className="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-lg hidden md:block">
+                <PenLine size={18} className="text-blue-600"/>
+            </div>
+            <h2 className="font-bold text-[10px] md:text-xs text-gray-600 dark:text-gray-400 uppercase tracking-widest">Manuscript</h2>
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={downloadPDF} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition" title="Export PDF"><FileDown size={16} className="md:w-[18px] md:h-[18px]"/></button>
+            <button onClick={downloadTXT} className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 transition" title="Export Text"><FileJson size={16} className="md:w-[18px] md:h-[18px]"/></button>
+            <div className="w-[1px] h-4 bg-gray-300 dark:bg-gray-700 mx-1 md:mx-2"></div>
+            <button onClick={() => setBookDraft("")} className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-red-500 transition" title="Clear Draft"><Eraser size={16} className="md:w-[18px] md:h-[18px]"/></button>
+          </div>
+        </header>
+        <div className="flex-1 p-6 md:p-12 lg:p-16 overflow-y-auto custom-scrollbar">
+            <textarea
+            className={`w-full h-full bg-transparent outline-none resize-none font-serif text-[1.1rem] md:text-[1.35rem] leading-[2] md:leading-[2.2] transition-all text-gray-800 dark:text-gray-300 placeholder:text-gray-300 dark:placeholder:text-gray-700`}
+            placeholder="As you answer my questions, your book will automatically be written and formatted here..."
+            value={bookDraft}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBookDraft(e.target.value)}
+            />
+        </div>
+      </div>
+
+      {/* --- RESPONSIVE AUTH MODAL --- */}
       {showAuth && (
-        <div className="fixed inset-0 bg-black/40 dark:bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-md transition-all">
-           <div className="bg-white dark:bg-[#161b22] p-10 rounded-[2.5rem] w-full max-w-md border border-gray-200 dark:border-gray-800 shadow-2xl relative text-gray-800 dark:text-white">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[100] backdrop-blur-sm transition-all">
+           <div className="bg-white dark:bg-[#161b22] p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] w-full max-w-sm md:max-w-md border border-gray-200 dark:border-gray-800 shadow-2xl relative text-gray-800 dark:text-white">
            
-           {/* Modal Close Button */}
-           <button onClick={() => setShowAuth(false)} className="absolute top-6 right-6 text-gray-400 hover:text-red-500">
-               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+           <button onClick={() => setShowAuth(false)} className="absolute top-4 right-4 md:top-6 md:right-6 text-gray-400 hover:text-red-500">
+               <X size={20} className="md:w-[24px] md:h-[24px]" />
            </button>
 
-           <h2 className="text-4xl font-black mb-8 text-center tracking-tighter italic uppercase text-blue-600">
+           <h2 className="text-2xl md:text-4xl font-black mb-6 md:mb-8 text-center tracking-tighter italic uppercase text-blue-600">
                {isReset ? 'Reset Access' : isLogin ? 'Sign In' : 'Join Muse'}
            </h2>
-           <div className="space-y-4">
-             {!isLogin && !isReset && <input placeholder="Your Name" className="w-full p-5 bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-gray-800 rounded-2xl outline-none focus:border-blue-500 transition" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthForm({...authForm, name: e.target.value})}/>}
-             <input placeholder="Email" className="w-full p-5 bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-gray-800 rounded-2xl outline-none focus:border-blue-500 transition" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthForm({...authForm, email: e.target.value})}/>
-             <input type="password" placeholder="Password" className="w-full p-5 bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-gray-800 rounded-2xl outline-none focus:border-blue-500 transition" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthForm({...authForm, password: e.target.value})}/>
-             <button onClick={handleAuth} className="w-full bg-blue-600 hover:bg-blue-700 p-5 rounded-2xl font-black text-xl mt-6 text-white shadow-lg shadow-blue-500/30 transition-all active:scale-95">CONTINUE</button>
+           <div className="space-y-3 md:space-y-4">
+             {!isLogin && !isReset && <input placeholder="Your Name" className="w-full p-4 md:p-5 text-sm md:text-base bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-gray-800 rounded-xl md:rounded-2xl outline-none focus:border-blue-500 transition" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthForm({...authForm, name: e.target.value})}/>}
+             <input placeholder="Email" className="w-full p-4 md:p-5 text-sm md:text-base bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-gray-800 rounded-xl md:rounded-2xl outline-none focus:border-blue-500 transition" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthForm({...authForm, email: e.target.value})}/>
+             <input type="password" placeholder="Password" className="w-full p-4 md:p-5 text-sm md:text-base bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-gray-800 rounded-xl md:rounded-2xl outline-none focus:border-blue-500 transition" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthForm({...authForm, password: e.target.value})}/>
+             <button onClick={handleAuth} className="w-full bg-blue-600 hover:bg-blue-700 p-4 md:p-5 rounded-xl md:rounded-2xl font-black text-lg md:text-xl mt-4 md:mt-6 text-white shadow-lg shadow-blue-500/30 transition-all active:scale-95 uppercase">CONTINUE</button>
              
-             <div className="relative py-4">
+             <div className="relative py-2 md:py-4">
                 <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200 dark:border-gray-800"></div></div>
-                <div className="relative flex justify-center"><span className="bg-white dark:bg-[#161b22] px-4 text-xs text-gray-400 uppercase font-bold">OR</span></div>
+                <div className="relative flex justify-center"><span className="bg-white dark:bg-[#161b22] px-3 md:px-4 text-[10px] md:text-xs text-gray-400 uppercase font-bold">OR</span></div>
              </div>
              
-             {/* GOOGLE OAUTH PROVIDER WRAPPER WITH NEW CLIENT ID */}
              <GoogleOAuthProvider clientId="691831191491-8dff26vujkmstq9do9sr7n32o6ghmmam.apps.googleusercontent.com">
                 <GoogleLoginButton onSuccess={handleGoogleAuth} />
              </GoogleOAuthProvider>
 
-             <p onClick={() => setIsLogin(!isLogin)} className="text-center text-xs font-bold text-gray-400 cursor-pointer hover:text-blue-500 mt-6 transition uppercase tracking-wider">
+             <p onClick={() => setIsLogin(!isLogin)} className="text-center text-[10px] md:text-xs font-bold text-gray-400 cursor-pointer hover:text-blue-500 mt-4 md:mt-6 transition uppercase tracking-wider">
                {isLogin ? "Need an account? Sign Up" : "Already have an account? Login"}
              </p>
            </div>
