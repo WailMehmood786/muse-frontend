@@ -69,7 +69,7 @@ export default function Home() {
 
   const loadSessions = async (userId: string) => {
     try {
-      const res = await axios.get(`https://muse-backend-qy5z.onrender.com/api/sessions/${userId}`);
+      const res = await axios.get(`https://muse-backend-production-29cd.up.railway.app/api/sessions/${userId}`);
       setSessions(res.data);
     } catch (err) { console.error("Sessions load fail"); }
   };
@@ -77,7 +77,7 @@ export default function Home() {
   const loadSessionHistory = async (sessionId: string) => {
     setLoading(true);
     try {
-      const res = await axios.get(`https://muse-backend-qy5z.onrender.com/api/history/${sessionId}`);
+      const res = await axios.get(`https://muse-backend-production-29cd.up.railway.app/api/history/${sessionId}`);
       setCurrentSessionId(sessionId);
       
       let reconstructedDraft = "";
@@ -111,7 +111,7 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const res = await axios.post('https://muse-backend-qy5z.onrender.com/api/chat', {
+      const res = await axios.post('https://muse-backend-production-29cd.up.railway.app/api/chat', {
         message: textToSend,
         userId: user ? user.id : null,
         history: messages,
@@ -156,7 +156,7 @@ export default function Home() {
     e.stopPropagation(); e.preventDefault();
     if (!confirm("Delete permanently?")) return;
     try {
-      await axios.delete(`https://muse-backend-qy5z.onrender.com/api/sessions/${sid}`);
+      await axios.delete(`https://muse-backend-production-29cd.up.railway.app/api/sessions/${sid}`);
       if (user) loadSessions(user.id);
       if (currentSessionId === sid) startNewChat();
     } catch (err) { alert("Delete failed"); }
@@ -208,13 +208,13 @@ export default function Home() {
   const handleAuth = async () => {
     try {
       if (isReset) {
-        await axios.post('https://muse-backend-qy5z.onrender.com/api/auth/reset-password', { email: authForm.email, newPassword: authForm.password });
+        await axios.post('https://muse-backend-production-29cd.up.railway.app/api/auth/reset-password', { email: authForm.email, newPassword: authForm.password });
         alert("Success! Login now.");
         setIsReset(false); setIsLogin(true);
         return;
       }
       const path = isLogin ? '/api/auth/login' : '/api/auth/signup';
-      const res = await axios.post(`https://muse-backend-qy5z.onrender.com${path}`, authForm);
+      const res = await axios.post(`https://muse-backend-production-29cd.up.railway.app${path}`, authForm);
       const data = { name: res.data.name, id: res.data.id };
       setUser(data);
       localStorage.setItem('user_muse', JSON.stringify(data));
@@ -226,7 +226,7 @@ export default function Home() {
   // --- GOOGLE LOGIN HANDLER ---
   const handleGoogleAuth = async (accessToken: string) => {
     try {
-      const res = await axios.post('https://muse-backend-qy5z.onrender.com/api/auth/google', { token: accessToken });
+      const res = await axios.post('https://muse-backend-production-29cd.up.railway.app/api/auth/google', { token: accessToken });
       const data = { name: res.data.name, id: res.data.id };
       setUser(data);
       localStorage.setItem('user_muse', JSON.stringify(data));
