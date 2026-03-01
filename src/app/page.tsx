@@ -7,14 +7,12 @@ import { jsPDF } from "jspdf";
 import ReactMarkdown from 'react-markdown';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import {
-  Send, Sparkles, LogOut, Loader2, UserCircle,
-  BookOpen, Plus, MessageSquare, FileDown,
-  FileJson, KeyRound, Trash2, LayoutPanelLeft, PenLine,
-  Mic, MicOff, Eraser, Type, Zap, Sun, Moon, Maximize2, Minimize2, Telescope,
-  Volume2, VolumeX, AlertTriangle, Menu, X, ChevronRight, PenTool
+  Send, Sparkles, LogOut, Loader2, BookOpen, Plus, MessageSquare, 
+  FileDown, FileJson, KeyRound, Trash2, LayoutPanelLeft, PenLine,
+  Mic, MicOff, Eraser, Sun, Moon, Maximize2, Minimize2, Volume2, VolumeX, Menu, X, ChevronRight,
+  AlertTriangle, Telescope, Sparkle, Settings
 } from 'lucide-react';
 
-// --- CUSTOM GOOGLE LOGIN BUTTON COMPONENT ---
 const GoogleLoginButton = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => onSuccess(tokenResponse.access_token),
@@ -22,8 +20,8 @@ const GoogleLoginButton = ({ onSuccess }: { onSuccess: (token: string) => void }
   });
 
   return (
-    <button onClick={() => login()} className="w-full bg-white dark:bg-[#0d1117] border-2 border-gray-200 dark:border-gray-800 hover:border-blue-500 p-4 rounded-2xl font-bold text-gray-700 dark:text-gray-300 flex items-center justify-center gap-3 transition active:scale-95">
-      <svg className="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+    <button onClick={() => login()} className="w-full bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] p-3 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 flex items-center justify-center gap-3 transition-all duration-200 shadow-sm active:scale-[0.98]">
+      <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
       Continue with Google
     </button>
   );
@@ -50,8 +48,14 @@ export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null); // Naya ref text box ke liye
 
-  useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { 
+    const timer = setTimeout(() => {
+      scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); 
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [messages, loading]);
 
   useEffect(() => {
     return () => {
@@ -77,7 +81,7 @@ export default function Home() {
 
   const loadSessionHistory = async (sessionId: string) => {
     setLoading(true);
-    setIsMobileMenuOpen(false); // Close mobile menu when selecting a chat
+    setIsMobileMenuOpen(false); 
     try {
       const res = await axios.get(`https://muse-backend-production-29cd.up.railway.app/api/history/${sessionId}`);
       setCurrentSessionId(sessionId);
@@ -86,10 +90,10 @@ export default function Home() {
       const history = res.data.map((h: any) => {
         let text = h.content;
         if (h.role === 'ai') {
-          const draftMatch = text.match(/\[START_DRAFT\]([\s\S]*?)\[END_DRAFT\]/);
+          const draftMatch = text.match(/\[START_DRAFT\]([\s\S]*?)\[END_DRAFT\]/i);
           if (draftMatch) {
             reconstructedDraft += "\n\n" + draftMatch[1].trim();
-            text = text.replace(/\[START_DRAFT\][\s\S]*?\[END_DRAFT\]/, '').trim();
+            text = text.replace(/\[START_DRAFT\][\s\S]*?\[END_DRAFT\]/i, '').trim();
           }
         }
         return { role: h.role === 'ai' ? 'ai' : 'user', text };
@@ -98,6 +102,8 @@ export default function Home() {
       setMessages(history);
       if (reconstructedDraft) {
         setBookDraft(reconstructedDraft.trim());
+      } else {
+        setBookDraft(""); 
       }
     } catch (err) { console.error("History load fail"); }
     setLoading(false);
@@ -109,7 +115,13 @@ export default function Home() {
 
     const newMsgs = [...messages, { role: 'user', text: textToSend } as const];
     setMessages(newMsgs);
+    
+    // Yahan text input clear ho raha hai aur size wapas chota ho raha hai
     setInput('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'; 
+    }
+    
     setLoading(true);
 
     try {
@@ -122,26 +134,19 @@ export default function Home() {
       });
       
       let aiReply = res.data.reply;
-      let extractedDraft = "";
-
-      const draftMatch = aiReply.match(/\[START_DRAFT\]([\s\S]*?)\[END_DRAFT\]/);
-      if (draftMatch) {
-        extractedDraft = draftMatch[1].trim();
-        aiReply = aiReply.replace(/\[START_DRAFT\][\s\S]*?\[END_DRAFT\]/, '').trim();
-      }
+      aiReply = aiReply.replace(/\[START_DRAFT\]/gi, '').replace(/\[END_DRAFT\]/gi, '').trim();
 
       setMessages([...newMsgs, { role: 'ai', text: aiReply }]);
       
-      if (extractedDraft) {
-        setBookDraft(prev => prev ? prev + "\n\n" + extractedDraft : extractedDraft);
-      }
+      // AUTO-ADD FEATURE (Perfect for book writing)
+      const newDraftContent = `**User:** ${textToSend}\n\n**Muse:** ${aiReply}`;
+      setBookDraft(prev => prev ? prev + "\n\n---\n\n" + newDraftContent : newDraftContent);
 
       if (!currentSessionId) {
         setCurrentSessionId(res.data.sessionId);
         if (user) loadSessions(user.id);
       }
     } catch (err: any) { 
-      console.error("Server Error Full Details:", err.response?.data);
       const errorMsg = err.response?.data?.details || err.response?.data?.error || "Connection Failed";
       alert(`API Error: ${errorMsg}`); 
     } finally { 
@@ -150,7 +155,7 @@ export default function Home() {
   };
 
   const handleDigDeeper = () => {
-      handleSend("That's the basic idea, but can you ask me a specific question to dig deeper into the emotions, details, or background of what I just said?");
+      handleSend("Please ask me a specific, highly thought-provoking question to dig deeper into the core emotions and details of what I just shared.");
   };
 
   const deleteSession = async (e: React.MouseEvent, sid: string) => {
@@ -164,7 +169,7 @@ export default function Home() {
   };
 
   const handleSpeak = (text: string, index: number) => {
-    if (!window.speechSynthesis) return alert("Your browser does not support text-to-speech.");
+    if (!window.speechSynthesis) return alert("Browser not supported");
     if (speakingIndex === index) {
       window.speechSynthesis.cancel();
       setSpeakingIndex(null);
@@ -173,23 +178,29 @@ export default function Home() {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    utterance.rate = 1;
-    utterance.onend = () => setSpeakingIndex(null);
-    utterance.onerror = () => setSpeakingIndex(null);
     setSpeakingIndex(index);
     window.speechSynthesis.speak(utterance);
   };
 
   const toggleListening = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("Browser not supported");
+    if (!SpeechRecognition) return alert("Voice recognition not supported.");
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
     if (isListening) { setIsListening(false); recognition.stop(); }
     else {
       setIsListening(true); recognition.start();
       recognition.onresult = (e: any) => {
-        setInput(prev => prev + " " + e.results[0][0].transcript);
+        const transcript = e.results[0][0].transcript;
+        setInput(prev => {
+           const newVal = prev + (prev ? " " : "") + transcript;
+           // Automatically resize text box when voice finishes
+           if (textareaRef.current) {
+             textareaRef.current.style.height = 'auto';
+             textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+           }
+           return newVal;
+        });
         setIsListening(false);
       };
       recognition.onerror = () => setIsListening(false);
@@ -201,12 +212,12 @@ export default function Home() {
     setCurrentSessionId(null);
     setBookDraft("");
     setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = 'auto';
     setIsMobileMenuOpen(false);
     if (window.speechSynthesis) window.speechSynthesis.cancel();
     setSpeakingIndex(null);
   };
 
-  // --- REGULAR EMAIL LOGIN ---
   const handleAuth = async () => {
     try {
       if (isReset) {
@@ -222,10 +233,9 @@ export default function Home() {
       localStorage.setItem('user_muse', JSON.stringify(data));
       loadSessions(data.id);
       setShowAuth(false);
-    } catch (err) { alert("Auth failed"); }
+    } catch (err) { alert("Authentication failed."); }
   };
 
-  // --- GOOGLE LOGIN HANDLER ---
   const handleGoogleAuth = async (accessToken: string) => {
     try {
       const res = await axios.post('https://muse-backend-production-29cd.up.railway.app/api/auth/google', { token: accessToken });
@@ -234,268 +244,289 @@ export default function Home() {
       localStorage.setItem('user_muse', JSON.stringify(data));
       loadSessions(data.id);
       setShowAuth(false);
-    } catch (err) { alert("Google Auth failed"); }
+    } catch (err) { alert("Google Authentication failed."); }
   };
 
   const downloadTXT = () => {
+    if(!bookDraft) return alert("Manuscript is empty.");
     const blob = new Blob([bookDraft], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, `Manuscript_${Date.now()}.txt`);
   };
 
   const downloadPDF = () => {
+    if(!bookDraft) return alert("Manuscript is empty.");
     const doc = new jsPDF();
-    doc.setFont("times", "bold").text("Wail's Muse - Manuscript Draft", 20, 20);
+    doc.setFont("times", "bold").text("My Manuscript", 20, 20);
     doc.setFont("times", "normal").setFontSize(12);
     const split = doc.splitTextToSize(bookDraft.replace(/[#*]/g, ''), 170);
     doc.text(split, 20, 30);
-    doc.save("Manuscript.pdf");
+    doc.save(`Manuscript_${Date.now()}.pdf`);
   };
 
   const themeClasses = {
-    bg: theme === 'dark' ? 'bg-[#0d1117]' : 'bg-[#fcfcfc]',
-    sidebar: theme === 'dark' ? 'bg-[#161b22]' : 'bg-[#f0f2f5]',
-    text: theme === 'dark' ? 'text-gray-100' : 'text-gray-800',
-    border: theme === 'dark' ? 'border-gray-800' : 'border-gray-200',
-    chatAi: theme === 'dark' ? 'bg-[#1c2128]' : 'bg-white shadow-sm border border-gray-100',
-    input: theme === 'dark' ? 'bg-[#161b22]' : 'bg-white',
-    iconHover: theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-200',
+    bg: theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-[#ffffff]',
+    sidebar: theme === 'dark' ? 'bg-[#121212]' : 'bg-[#f9f9fb]',
+    text: theme === 'dark' ? 'text-gray-200' : 'text-gray-800',
+    border: theme === 'dark' ? 'border-[#222]' : 'border-gray-200/60',
+    inputBg: theme === 'dark' ? 'bg-[#1a1a1a]' : 'bg-white',
   };
 
   return (
-    <div className={`flex h-screen w-full ${themeClasses.bg} ${themeClasses.text} font-sans transition-colors duration-300 overflow-hidden relative`}>
+    <div className={`flex h-screen w-full ${themeClasses.bg} ${themeClasses.text} font-sans transition-colors duration-300 overflow-hidden relative selection:bg-blue-500/20`}>
       
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/60 z-20 md:hidden backdrop-blur-sm transition-opacity" onClick={() => setIsMobileMenuOpen(false)} />
+        <div className="fixed inset-0 bg-black/50 z-[60] md:hidden backdrop-blur-sm transition-opacity" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
-      {/* Sidebar (Responsive) */}
+      {/* Modern, Slim Sidebar */}
       {!zenMode && (
-        <aside className={`fixed md:relative z-30 h-full w-[80%] max-w-[320px] md:w-80 ${themeClasses.sidebar} border-r ${themeClasses.border} flex flex-col p-6 transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} md:translate-x-0`}>
+        <aside className={`fixed md:relative z-[70] h-full w-[260px] ${themeClasses.sidebar} border-r ${themeClasses.border} flex flex-col transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} md:translate-x-0 shrink-0`}>
           
-          {/* Mobile Close Button */}
-          <button className="md:hidden absolute top-6 right-6 text-gray-400 hover:text-red-500 transition" onClick={() => setIsMobileMenuOpen(false)}>
-            <X size={24}/>
-          </button>
-
-          <div className="flex items-center gap-3 mb-8 mt-2 md:mt-0">
-            <div className="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/30">
-                <Sparkles size={22} className="fill-white" />
+          <div className="p-5 flex items-center justify-between border-b border-transparent">
+            <div className="flex items-center gap-2.5 select-none">
+              <div className="bg-blue-600 p-1.5 rounded-md flex items-center justify-center">
+                  <PenLine size={16} className="text-white" />
+              </div>
+              <h1 className="font-bold text-[17px] tracking-tight text-gray-900 dark:text-white">Muse <span className="text-gray-400 font-normal">AI</span></h1>
             </div>
-            <div>
-                <h1 className="font-black text-2xl tracking-tighter text-blue-600 leading-none">MUSE</h1>
-                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">AI Ghostwriter</p>
-            </div>
+            <button className="md:hidden text-gray-500 hover:text-gray-800 dark:hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>
+              <X size={18}/>
+            </button>
           </div>
 
-          <button onClick={startNewChat} className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-2xl transition mb-8 font-bold shadow-lg shadow-blue-500/20 active:scale-95">
-            <Plus size={20}/> New Masterpiece
-          </button>
+          <div className="px-3 pt-2">
+            <button onClick={startNewChat} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-all duration-200 w-full font-medium text-[13px] shadow-sm active:scale-95">
+              <Plus size={16} /> Start Writing
+            </button>
+          </div>
           
-          <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-            <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest px-2 mb-3 flex items-center gap-2">
-                <Zap size={12} className="text-yellow-500" /> Your Library
-            </p>
+          <div className="flex-1 overflow-y-auto space-y-0.5 mt-4 px-3 custom-scrollbar">
+            <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider px-2 mb-2 select-none">Recent Drafts</p>
             {sessions.map((s, i) => (
-              <div key={i} className="group relative">
+              <div key={i} className="group relative flex items-center">
                 <button
                   onClick={() => loadSessionHistory(s.sessionId)}
-                  className={`flex items-center gap-3 p-3 w-full rounded-xl text-left text-sm transition font-medium ${currentSessionId === s.sessionId ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 border border-blue-100 dark:border-blue-800' : `hover:bg-black/5 dark:hover:bg-white/5 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}`}
+                  className={`flex items-center gap-2.5 p-2 w-full rounded-md text-left text-[13px] transition-all duration-200 ${currentSessionId === s.sessionId ? 'bg-gray-200/50 dark:bg-white/10 text-gray-900 dark:text-white font-medium' : `hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400`}`}
                 >
-                  <MessageSquare size={16} className={currentSessionId === s.sessionId ? "text-blue-500 shrink-0" : "text-gray-400 shrink-0"} />
-                  <span className="truncate">{s.content}</span>
+                  <MessageSquare size={14} className={currentSessionId === s.sessionId ? "text-gray-900 dark:text-gray-300" : "text-gray-400"} />
+                  <span className="truncate flex-1">{s.content}</span>
                 </button>
-                <Trash2 onClick={(e: React.MouseEvent) => deleteSession(e, s.sessionId)} size={14} className="absolute right-3 top-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition cursor-pointer md:block hidden" />
+                <button onClick={(e) => deleteSession(e, s.sessionId)} className="absolute right-1 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all bg-gray-100 dark:bg-[#1a1a1a] rounded shadow-sm">
+                  <Trash2 size={12} />
+                </button>
               </div>
             ))}
-            {!user && (
-                <div className="p-4 mt-4 bg-blue-50 dark:bg-[#1c2128] rounded-xl border border-blue-100 dark:border-gray-800 text-center">
-                    <p className="text-xs text-blue-600 dark:text-blue-400 font-bold">Login to save your library</p>
+            {!user && sessions.length === 0 && (
+                <div className="p-4 mt-2 bg-transparent text-center select-none">
+                    <p className="text-[12px] text-gray-400">Sign in to sync your drafts.</p>
                 </div>
             )}
           </div>
 
-          <div className="mt-auto space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex gap-2">
-                <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border ${themeClasses.border} bg-white dark:bg-[#161b22] shadow-sm hover:shadow-md transition`}>
-                    {theme === 'dark' ? <Sun size={18} className="text-yellow-500" /> : <Moon size={18} className="text-blue-500" />}
+          <div className="p-4 border-t border-gray-200/60 dark:border-[#222]">
+              <div className="flex gap-2">
+                <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className={`flex items-center justify-center p-2 rounded-lg border ${themeClasses.border} bg-white dark:bg-[#111] hover:bg-gray-50 dark:hover:bg-[#222] transition-colors`} title="Toggle Theme">
+                    {theme === 'dark' ? <Sun size={16} className="text-gray-400" /> : <Moon size={16} className="text-gray-600" />}
                 </button>
                 {user ? (
-                    <button onClick={() => {localStorage.clear(); window.location.reload();}} className={`flex items-center justify-center p-3 rounded-xl border ${themeClasses.border} bg-white dark:bg-[#161b22] shadow-sm hover:shadow-md hover:text-red-500 transition`} title="Logout">
-                        <LogOut size={18}/>
+                    <button onClick={() => {localStorage.clear(); window.location.reload();}} className={`flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border ${themeClasses.border} bg-white dark:bg-[#111] hover:bg-gray-50 dark:hover:bg-[#222] text-gray-600 dark:text-gray-300 text-[13px] font-medium transition-colors`} title="Logout">
+                        <LogOut size={14} className="text-gray-400"/> Logout
                     </button>
                 ) : (
-                    <button onClick={() => {setShowAuth(true); setIsMobileMenuOpen(false);}} className={`p-3 px-4 w-full rounded-xl border ${themeClasses.border} bg-white dark:bg-[#161b22] text-xs font-bold uppercase text-blue-600 shadow-sm hover:shadow-md transition`} title="Login">
-                        Login
+                    <button onClick={() => {setShowAuth(true); setIsMobileMenuOpen(false);}} className={`flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111] hover:bg-gray-50 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors`}>
+                        Sign In
                     </button>
                 )}
-            </div>
+              </div>
           </div>
         </aside>
       )}
 
-      {/* Main Chat Area (Hidden on mobile if Draft is open) */}
-      <div className={`flex-1 flex-col transition-all duration-500 ${isDraftOpen ? 'hidden md:flex md:w-1/2' : 'flex w-full'}`}>
-        <header className={`p-4 md:p-5 border-b ${themeClasses.border} flex justify-between items-center ${themeClasses.bg} z-10 shadow-sm shadow-black/5`}>
-          <div className="flex items-center gap-2 md:gap-4">
+      {/* Main Chat Area */}
+      <div className={`flex-1 flex flex-col relative ${isDraftOpen ? 'hidden md:flex md:w-[50%]' : 'flex w-full'}`}>
+        
+        {/* Sleek Topbar */}
+        <header className={`h-14 flex-shrink-0 px-4 md:px-6 border-b ${themeClasses.border} flex justify-between items-center bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md z-30`}>
+          <div className="flex items-center gap-3">
             {!zenMode && (
-              <button className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition" onClick={() => setIsMobileMenuOpen(true)}>
-                <Menu size={22} />
+              <button className="md:hidden p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 transition" onClick={() => setIsMobileMenuOpen(true)}>
+                <Menu size={18} />
               </button>
             )}
-            <button onClick={() => setZenMode(!zenMode)} className={`hidden md:block p-2 rounded-lg ${themeClasses.iconHover} text-gray-500 transition`} title="Zen Mode">
-                {zenMode ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+            <button onClick={() => setZenMode(!zenMode)} className={`hidden md:flex p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 transition`} title="Focus Mode">
+                {zenMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </button>
-            <select
-                value={writingMode}
-                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setWritingMode(e.target.value)}
-                className={`bg-transparent border ${themeClasses.border} text-[10px] md:text-xs font-bold uppercase rounded-lg px-2 py-1.5 md:px-3 md:py-1.5 outline-none cursor-pointer focus:border-blue-500 text-gray-500`}
-            >
-                <option className="text-black">Creative Voice</option>
-                <option className="text-black">Professional</option>
-                <option className="text-black">Dramatic Story</option>
-                <option className="text-black">Memoir Style</option>
-            </select>
+            
+            <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#222] px-2 py-1 rounded-md">
+              <Settings size={12} className="text-gray-400" />
+              <select
+                  value={writingMode}
+                  onChange={(e) => setWritingMode(e.target.value)}
+                  className={`bg-transparent text-[12px] font-medium rounded outline-none cursor-pointer text-gray-600 dark:text-gray-300`}
+              >
+                  <option value="Creative" className="bg-white dark:bg-[#111]">Creative</option>
+                  <option value="Professional" className="bg-white dark:bg-[#111]">Professional</option>
+                  <option value="Memoir" className="bg-white dark:bg-[#111]">Memoir</option>
+              </select>
+            </div>
           </div>
-          <button onClick={() => setIsDraftOpen(!isDraftOpen)} className={`flex items-center gap-2 p-2 md:p-2.5 rounded-xl transition font-bold text-[10px] md:text-xs uppercase tracking-wider ${isDraftOpen ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-blue-50 border border-blue-100 text-blue-600 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400 hover:bg-blue-100 transition'}`}>
-            <PenTool size={16} className="md:w-[18px] md:h-[18px]" />
-            <span>{isDraftOpen ? 'Hide Draft' : 'View Manuscript'}</span>
+
+          <button onClick={() => setIsDraftOpen(!isDraftOpen)} className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors font-medium text-[12px] ${isDraftOpen ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#222]'}`}>
+            <BookOpen size={14} />
+            <span>Manuscript</span>
           </button>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 space-y-6 md:space-y-8 scroll-smooth">
+        {/* Clean Chat Area */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-40 scroll-smooth custom-scrollbar relative">
+          
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center select-none max-w-lg mx-auto">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 md:p-6 rounded-full mb-6 shadow-xl shadow-blue-500/30">
-                  <BookOpen size={48} className="text-white md:w-[64px] md:h-[64px]" />
+            <div className="h-full flex flex-col items-center justify-center text-center select-none max-w-lg mx-auto px-4 animate-in fade-in duration-500">
+              <div className="bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#222] p-4 rounded-xl mb-6 shadow-sm">
+                  <Sparkles size={24} className="text-blue-500" />
               </div>
-              <h2 className="text-2xl md:text-3xl italic font-serif text-gray-800 dark:text-gray-200 leading-tight">"Let's write your book, together."</h2>
-              <p className="mt-4 text-xs md:text-sm font-sans uppercase tracking-widest text-gray-500 font-medium">I am your elite ghostwriter. I will interview you, capture your voice, and write your story.</p>
+              <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-2 tracking-tight">Craft your story.</h2>
+              <p className="text-[14px] md:text-[15px] text-gray-500 dark:text-gray-400 mb-8 max-w-md">
+                Talk to me naturally. Everything we discuss is automatically structured and added to your manuscript.
+              </p>
               
-              {/* Quick Prompts for Ghostwriting */}
-              <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
-                <button onClick={() => handleSend("Let's outline the chapters of my book first.")} className={`p-4 rounded-xl border ${themeClasses.border} text-sm font-medium text-left hover:border-blue-500 transition hover:shadow-md flex items-center gap-3`}>
-                  <div className="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg text-blue-500"><LayoutPanelLeft size={18}/></div>
-                  Outline my book
-                </button>
-                <button onClick={() => handleSend("Interview me about my childhood and early memories.")} className={`p-4 rounded-xl border ${themeClasses.border} text-sm font-medium text-left hover:border-blue-500 transition hover:shadow-md flex items-center gap-3`}>
-                  <div className="bg-yellow-50 dark:bg-yellow-900/30 p-2 rounded-lg text-yellow-500"><Zap size={18}/></div>
-                  Interview: Early Memories
-                </button>
-                <button onClick={() => handleSend("I want to write a professional business memoir. Let's calibrate my voice.")} className={`p-4 rounded-xl border ${themeClasses.border} text-sm font-medium text-left hover:border-blue-500 transition hover:shadow-md flex items-center gap-3 md:col-span-2`}>
-                  <div className="bg-purple-50 dark:bg-purple-900/30 p-2 rounded-lg text-purple-500"><Telescope size={18}/></div>
-                  Calibrate my writing voice
+              <div className="w-full flex justify-center">
+                <button onClick={() => handleSend("Let's start. Ask me the first question about my background.")} className={`px-5 py-3 rounded-lg bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 transition-all font-medium text-[14px] shadow-sm active:scale-95 flex items-center gap-2`}>
+                  Start Interview <ChevronRight size={16}/>
                 </button>
               </div>
             </div>
           )}
           
-          {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`p-5 md:p-6 rounded-[1.5rem] md:rounded-[2rem] max-w-[90%] md:max-w-[85%] leading-relaxed text-[1rem] md:text-[1.1rem] transition-all relative group shadow-sm ${
-                m.role === 'user' ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-br-none shadow-blue-500/20' : `${themeClasses.chatAi} rounded-tl-none text-gray-700 dark:text-gray-300`
-              }`}>
-                <div className="prose dark:prose-invert max-w-none text-sm md:text-base">
-                  <ReactMarkdown>{m.text}</ReactMarkdown>
+          <div className="max-w-3xl mx-auto space-y-6">
+            {messages.map((m, i) => (
+              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 fade-in duration-300`}>
+                <div className={`p-4 md:p-5 max-w-[85%] leading-relaxed text-[14px] md:text-[15px] ${
+                  m.role === 'user' 
+                    ? 'bg-[#f0f0f0] dark:bg-[#222] text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm' 
+                    : `bg-transparent text-gray-800 dark:text-gray-200 w-full`
+                }`}>
+                  
+                  <div className={`prose prose-sm md:prose-base max-w-none ${m.role === 'user' ? 'dark:prose-invert' : 'prose-blue dark:prose-invert'}`}>
+                    <ReactMarkdown>{m.text}</ReactMarkdown>
+                  </div>
+                  
+                  {m.role === 'ai' && (
+                    <div className="mt-3 flex items-center gap-3">
+                      <button
+                        onClick={() => handleSpeak(m.text, i)}
+                        className="flex items-center gap-1.5 text-[12px] font-medium text-gray-400 hover:text-blue-500 transition-colors"
+                      >
+                        {speakingIndex === i ? (
+                          <><VolumeX size={14}/> Stop</>
+                        ) : (
+                          <><Volume2 size={14}/> Read</>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
-                
-                {m.role === 'ai' && (
-                  <button
-                    onClick={() => handleSpeak(m.text, i)}
-                    className="mt-4 flex items-center gap-2 text-[10px] font-bold text-gray-400 hover:text-blue-500 transition uppercase tracking-widest border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-full hover:bg-blue-50 dark:hover:bg-gray-800 w-max"
-                  >
-                    {speakingIndex === i ? (
-                      <><VolumeX size={14} className="text-red-500"/> Stop Reading</>
-                    ) : (
-                      <><Volume2 size={14} className="text-blue-500"/> Listen</>
-                    )}
-                  </button>
-                )}
               </div>
-            </div>
-          ))}
-          {loading && (
-            <div className="flex items-center gap-3 text-blue-500 italic text-sm ml-2 md:ml-6 font-medium animate-pulse">
-              <Loader2 className="animate-spin" size={16} /> Muse is writing & thinking...
-            </div>
-          )}
+            ))}
+
+            {loading && (
+              <div className="flex items-center gap-3 text-gray-400 text-[13px] font-medium ml-4 p-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-75"></div>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-150"></div>
+              </div>
+            )}
+          </div>
+          
+          <div className="h-32 w-full shrink-0"></div>
           <div ref={scrollRef} />
         </main>
 
-        <footer className={`p-4 md:p-6 lg:px-12 ${themeClasses.bg} border-t ${themeClasses.border} pb-6 md:pb-8`}>
-          
-          {!user && messages.length > 0 && (
-            <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 text-yellow-800 dark:text-yellow-500 text-[10px] md:text-sm font-bold px-4 py-3 rounded-2xl mb-4 flex flex-col md:flex-row gap-3 justify-between items-center shadow-sm">
-              <span className="flex items-center gap-2 text-center md:text-left"><AlertTriangle size={16} className="shrink-0" /> Guest Mode: Login to save your draft and history!</span>
-              <button onClick={() => setShowAuth(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl transition uppercase tracking-wider text-[10px] w-full md:w-auto">Login Now</button>
-            </div>
-          )}
-
-          {messages.length > 0 && (
-              <div className="flex gap-2 mb-3 overflow-x-auto custom-scrollbar pb-1">
-                  <button onClick={handleDigDeeper} className="flex shrink-0 items-center gap-2 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 text-gray-500 text-[10px] md:text-xs font-bold uppercase px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all border shadow-sm border-gray-200 dark:border-gray-700">
-                      <Telescope size={14}/> Ask me to Dig Deeper
-                  </button>
-                  <button onClick={() => handleSend("Turn my last answer into a beautifully written paragraph for the book.")} className="flex shrink-0 items-center gap-2 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 text-gray-500 text-[10px] md:text-xs font-bold uppercase px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all border shadow-sm border-gray-200 dark:border-gray-700">
-                      <PenTool size={14}/> Add to Manuscript
-                  </button>
-              </div>
-          )}
-          <div className="relative flex items-end md:items-center gap-2 md:gap-4">
-            <button
-              onClick={toggleListening}
-              className={`p-3 md:p-4 rounded-2xl md:rounded-[2rem] transition-all border ${themeClasses.border} shadow-sm shrink-0 ${isListening ? 'bg-red-50 border-red-200 text-red-500 animate-pulse' : 'bg-white dark:bg-[#161b22] text-gray-400 hover:text-blue-500 hover:border-blue-200'}`}
-              title="Speak"
-            >
-              {isListening ? <Mic size={20} className="md:w-6 md:h-6"/> : <MicOff size={20} className="md:w-6 md:h-6"/>}
-            </button>
+        {/* Dynamic & Resizing Input Dock */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a] z-40">
+          <div className="max-w-3xl mx-auto">
             
-            <textarea
-              className={`flex-1 ${themeClasses.input} border-2 ${themeClasses.border} rounded-2xl md:rounded-3xl p-3 md:p-5 pr-12 md:pr-16 outline-none focus:border-blue-400 transition-all text-sm md:text-lg shadow-sm resize-none custom-scrollbar placeholder:text-gray-400 dark:placeholder:text-gray-600 leading-relaxed`}
-              placeholder={isListening ? "Listening..." : "Tell me your thoughts... (Shift + Enter for new line)"}
-              value={input}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              rows={1}
-              style={{ minHeight: '50px', maxHeight: '150px' }}
-            />
+            {messages.length > 0 && !loading && (
+                <div className="flex justify-center mb-3">
+                    <button onClick={handleDigDeeper} className="flex items-center gap-1.5 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] text-gray-600 dark:text-gray-300 text-[12px] font-medium px-4 py-2 rounded-full transition-all shadow-sm">
+                        <Telescope size={14} className="text-gray-400"/> Ask me more
+                    </button>
+                </div>
+            )}
 
-            <button onClick={() => handleSend()} className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-2.5 md:p-3 bg-blue-600 text-white rounded-xl md:rounded-2xl hover:bg-blue-700 shadow-md shadow-blue-500/30 active:scale-95 transition-all">
-              <Send size={18} className="md:w-5 md:h-5"/>
-            </button>
+            {!user && messages.length > 0 && (
+              <div className="mb-2 flex items-center justify-center gap-1.5 text-[12px] text-gray-500 font-medium">
+                <AlertTriangle size={14} className="text-yellow-500" /> Guest session. <span onClick={() => setShowAuth(true)} className="underline cursor-pointer hover:text-gray-800 dark:hover:text-white">Sign in to save.</span>
+              </div>
+            )}
+
+            <div className={`relative flex items-end gap-2 ${themeClasses.inputBg} border ${themeClasses.border} rounded-xl p-1.5 shadow-sm focus-within:border-gray-400 dark:focus-within:border-gray-600 transition-colors`}>
+              <button
+                onClick={toggleListening}
+                className={`p-2.5 rounded-lg transition-colors shrink-0 ${isListening ? 'bg-red-50 dark:bg-red-500/10 text-red-500 animate-pulse' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-[#222]'}`}
+              >
+                {isListening ? <Mic size={18} /> : <MicOff size={18} />}
+              </button>
+              
+              {/* AUTO RESIZING TEXTAREA FOR BOOK WRITING */}
+              <textarea
+                ref={textareaRef}
+                className={`flex-1 bg-transparent border-none outline-none py-2.5 px-1 text-[14px] md:text-[15px] resize-none custom-scrollbar text-gray-900 dark:text-gray-100 placeholder:text-gray-400`}
+                placeholder="Share your story or answer the interview question in detail..."
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  // Text box ko dynamically adjust karna 
+                  e.target.style.height = 'auto';
+                  e.target.style.height = `${Math.min(e.target.scrollHeight, 250)}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                rows={1}
+                style={{ minHeight: '40px', maxHeight: '250px' }}
+              />
+
+              <button onClick={() => handleSend()} className="p-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all active:scale-95 shrink-0">
+                <Send size={16}/>
+              </button>
+            </div>
           </div>
-        </footer>
+        </div>
       </div>
 
-      {/* Manuscript / Draft Panel (Responsive sliding panel) */}
+      {/* Elegant Manuscript Panel */}
       {isDraftOpen && (
-        <div className={`absolute inset-0 md:relative md:inset-auto z-40 w-full md:w-1/2 flex flex-col animate-in slide-in-from-right duration-500 bg-[#fdfdfd] dark:bg-[#0d1117] md:border-l ${themeClasses.border} shadow-2xl`}>
-          <header className={`p-4 md:p-5 border-b ${themeClasses.border} flex justify-between items-center bg-[#fcfcfc] dark:bg-[#161b22]`}>
-            <div className="flex items-center gap-2 md:gap-3">
-              <button className="md:hidden p-1.5 text-gray-500 hover:bg-gray-200 rounded-lg mr-1" onClick={() => setIsDraftOpen(false)}>
-                <ChevronRight size={20} />
+        <div className={`absolute inset-0 md:relative md:inset-auto z-[60] w-full md:w-[45%] flex flex-col bg-white dark:bg-[#0a0a0a] border-l ${themeClasses.border} shadow-2xl md:shadow-none animate-in slide-in-from-right duration-300 shrink-0`}>
+          <header className={`h-14 px-4 md:px-6 border-b ${themeClasses.border} flex justify-between items-center bg-transparent`}>
+            <div className="flex items-center gap-2">
+              <button className="md:hidden p-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-[#222] rounded-md transition" onClick={() => setIsDraftOpen(false)}>
+                <ChevronRight size={18} />
               </button>
-              <div className="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded-lg">
-                  <PenLine size={16} className="text-blue-600 md:w-[18px] md:h-[18px]"/>
-              </div>
-              <h2 className="font-bold text-[10px] md:text-xs text-gray-600 dark:text-gray-400 uppercase tracking-widest">Your Book Draft</h2>
+              <h2 className="font-semibold text-[14px] text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                Manuscript
+                <span className="flex h-2 w-2 relative">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+              </h2>
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={downloadPDF} className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 transition" title="Export PDF"><FileDown size={16} className="md:w-[18px] md:h-[18px]"/></button>
-              <button onClick={downloadTXT} className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 transition" title="Export Text"><FileJson size={16} className="md:w-[18px] md:h-[18px]"/></button>
-              <div className="w-[1px] h-4 bg-gray-300 dark:bg-gray-700 mx-1 md:mx-2"></div>
-              <button onClick={() => setBookDraft("")} className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-red-500 transition" title="Clear Draft"><Eraser size={16} className="md:w-[18px] md:h-[18px]"/></button>
+              <button onClick={downloadPDF} className="px-2 py-1 text-[12px] text-gray-500 hover:bg-gray-100 dark:hover:bg-[#222] rounded transition-colors font-medium">PDF</button>
+              <button onClick={downloadTXT} className="px-2 py-1 text-[12px] text-gray-500 hover:bg-gray-100 dark:hover:bg-[#222] rounded transition-colors font-medium">TXT</button>
+              <span className="text-gray-300 dark:text-gray-700 mx-1">|</span>
+              <button onClick={() => { if(confirm("Clear the entire manuscript?")) setBookDraft(""); }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"><Trash2 size={14} /></button>
             </div>
           </header>
-          <div className="flex-1 p-6 md:p-12 lg:p-16 overflow-y-auto custom-scrollbar bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] dark:bg-none">
+          
+          <div className="flex-1 p-6 md:p-12 overflow-y-auto custom-scrollbar bg-white dark:bg-[#0a0a0a]">
               <textarea
-                className={`w-full h-full bg-transparent outline-none resize-none font-serif text-[1.1rem] md:text-[1.35rem] leading-[2] md:leading-[2.2] transition-all text-gray-800 dark:text-gray-300 placeholder:text-gray-400 dark:placeholder:text-gray-600`}
-                placeholder="The manuscript will automatically be written and formatted here as you answer my interview questions..."
+                className={`w-full h-full bg-transparent outline-none resize-none font-serif text-[16px] md:text-[18px] leading-[1.8] text-gray-800 dark:text-gray-200 placeholder:text-gray-300 dark:placeholder:text-[#333]`}
+                placeholder="Your drafted content will appear here..."
                 value={bookDraft}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBookDraft(e.target.value)}
               />
@@ -503,35 +534,40 @@ export default function Home() {
         </div>
       )}
 
-      {/* Auth Modal */}
+      {/* Clean Auth Modal */}
       {showAuth && (
-        <div className="fixed inset-0 bg-black/50 dark:bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-all">
-           <div className="bg-white dark:bg-[#161b22] p-8 md:p-10 rounded-[2rem] md:rounded-[2.5rem] w-full max-w-md border border-gray-200 dark:border-gray-800 shadow-2xl relative text-gray-800 dark:text-white">
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/80 flex items-center justify-center p-4 z-[100] backdrop-blur-sm transition-all">
+           <div className="bg-white dark:bg-[#111] p-8 rounded-2xl w-full max-w-[400px] border border-gray-200/60 dark:border-[#222] shadow-2xl relative animate-in zoom-in-95 duration-200">
            
-           <button onClick={() => setShowAuth(false)} className="absolute top-5 right-5 text-gray-400 hover:text-red-500 transition">
-               <X size={24}/>
-           </button>
+           <button onClick={() => setShowAuth(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 dark:hover:text-white p-2 rounded-md"><X size={16}/></button>
 
-           <h2 className="text-3xl md:text-4xl font-black mb-6 md:mb-8 text-center tracking-tighter italic uppercase text-blue-600">
-               {isReset ? 'Reset Access' : isLogin ? 'Sign In' : 'Join Muse'}
-           </h2>
-           <div className="space-y-3 md:space-y-4">
-             {!isLogin && !isReset && <input placeholder="Your Name" className="w-full p-4 md:p-5 bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-gray-800 rounded-2xl outline-none focus:border-blue-500 transition text-sm md:text-base" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthForm({...authForm, name: e.target.value})}/>}
-             <input placeholder="Email" className="w-full p-4 md:p-5 bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-gray-800 rounded-2xl outline-none focus:border-blue-500 transition text-sm md:text-base" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthForm({...authForm, email: e.target.value})}/>
-             <input type="password" placeholder="Password" className="w-full p-4 md:p-5 bg-gray-50 dark:bg-[#0d1117] border border-gray-200 dark:border-gray-800 rounded-2xl outline-none focus:border-blue-500 transition text-sm md:text-base" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthForm({...authForm, password: e.target.value})}/>
-             <button onClick={handleAuth} className="w-full bg-blue-600 hover:bg-blue-700 p-4 md:p-5 rounded-2xl font-black text-lg md:text-xl mt-4 md:mt-6 text-white shadow-lg shadow-blue-500/30 transition-all active:scale-95">CONTINUE</button>
+           <div className="mb-6">
+             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1 tracking-tight">
+                 {isReset ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create an account'}
+             </h2>
+             <p className="text-[13px] text-gray-500">Securely sync your workspace.</p>
+           </div>
+
+           <div className="space-y-3">
+             {!isLogin && !isReset && <input placeholder="Full Name" className="w-full p-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-lg outline-none focus:border-gray-400 transition-colors text-[14px]" onChange={(e) => setAuthForm({...authForm, name: e.target.value})}/>}
+             <input placeholder="Email Address" className="w-full p-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-lg outline-none focus:border-gray-400 transition-colors text-[14px]" onChange={(e) => setAuthForm({...authForm, email: e.target.value})}/>
+             <input type="password" placeholder="Password" className="w-full p-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-lg outline-none focus:border-gray-400 transition-colors text-[14px]" onChange={(e) => setAuthForm({...authForm, password: e.target.value})}/>
+             
+             <button onClick={handleAuth} className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 p-3 rounded-lg font-medium text-[14px] mt-2 transition-all active:scale-[0.98]">
+                {isLogin ? "Sign In" : "Continue"}
+             </button>
              
              <div className="relative py-4">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200 dark:border-gray-800"></div></div>
-                <div className="relative flex justify-center"><span className="bg-white dark:bg-[#161b22] px-4 text-xs text-gray-400 uppercase font-bold">OR</span></div>
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200 dark:border-[#333]"></div></div>
+                <div className="relative flex justify-center"><span className="bg-white dark:bg-[#111] px-3 text-[11px] font-medium text-gray-400">OR</span></div>
              </div>
              
              <GoogleOAuthProvider clientId="691831191491-8dff26vujkmstq9do9sr7n32o6ghmmam.apps.googleusercontent.com">
                 <GoogleLoginButton onSuccess={handleGoogleAuth} />
              </GoogleOAuthProvider>
 
-             <p onClick={() => setIsLogin(!isLogin)} className="text-center text-[10px] md:text-xs font-bold text-gray-400 cursor-pointer hover:text-blue-500 mt-6 transition uppercase tracking-wider">
-               {isLogin ? "Need an account? Sign Up" : "Already have an account? Login"}
+             <p onClick={() => setIsLogin(!isLogin)} className="text-center text-[13px] text-gray-500 hover:text-gray-800 dark:hover:text-white mt-4 cursor-pointer transition-colors">
+                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
              </p>
            </div>
          </div>
