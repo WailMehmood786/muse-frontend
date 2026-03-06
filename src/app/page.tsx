@@ -1,578 +1,599 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { saveAs } from 'file-saver';
-import { jsPDF } from "jspdf";
-import ReactMarkdown from 'react-markdown';
-import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
-import {
-  Send, Sparkles, LogOut, Loader2, BookOpen, Plus, MessageSquare, 
-  FileDown, FileJson, KeyRound, Trash2, LayoutPanelLeft, PenLine,
-  Mic, MicOff, Eraser, Sun, Moon, Maximize2, Minimize2, Volume2, VolumeX, Menu, X, ChevronRight,
-  AlertTriangle, Telescope, Sparkle, Settings
-} from 'lucide-react';
+import PublisherDashboard from '@/components/PublisherDashboard';
+import ClientInterview from '@/components/ClientInterview';
+import { VoiceAgent } from '@/utils/voiceAgent';
+import { Sun, Moon, LogOut } from 'lucide-react';
 
-const GoogleLoginButton = ({ onSuccess }: { onSuccess: (token: string) => void }) => {
-  const login = useGoogleLogin({
-    onSuccess: (tokenResponse) => onSuccess(tokenResponse.access_token),
-    onError: () => alert('Google Login Failed'),
-  });
+// Ultra HDR Design
 
-  return (
-    <button onClick={() => login()} className="w-full bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] p-3 rounded-lg font-semibold text-sm text-gray-700 dark:text-gray-300 flex items-center justify-center gap-3 transition-all duration-200 shadow-sm active:scale-[0.98]">
-      <svg className="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-      Continue with Google
-    </button>
-  );
-};
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+  bookTitle: string;
+  uniqueLink: string;
+  sessionId: string | null;
+  lastActive: string;
+  status: 'active' | 'completed' | 'pending';
+  progress: number;
+  messages: { role: 'user' | 'ai', text: string }[];
+  bookDraft: string;
+  wordCount: number;
+  sport?: string;
+}
+
+type Message = { role: 'user' | 'ai'; text: string };
 
 export default function Home() {
-  const [messages, setMessages] = useState<{role: 'user' | 'ai', text: string}[]>([]);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
-  const [bookDraft, setBookDraft] = useState<string>("");
-  const [isDraftOpen, setIsDraftOpen] = useState(false);
+  const [user, setUser] = useState<{ name: string, id: string, role: 'publisher' | 'client' } | null>(null);
+  const [isPublisher, setIsPublisher] = useState(false);
+  const [showAuth, setShowAuth] = useState(true);
+  const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+  const [showAddClient, setShowAddClient] = useState(false);
+  const [newClientName, setNewClientName] = useState('');
+  const [newClientEmail, setNewClientEmail] = useState('');
+  const [newClientBook, setNewClientBook] = useState('');
+  const [newClientSport, setNewClientSport] = useState('baseball');
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [user, setUser] = useState<{name: string, id: string} | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
-  const [isReset, setIsReset] = useState(false);
-  const [authForm, setAuthForm] = useState({ email: '', password: '', name: '' });
-  const [theme, setTheme] = useState<'dark' | 'light'>('light');
-  const [zenMode, setZenMode] = useState(false);
+  const [bookDraft, setBookDraft] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const [writingMode, setWritingMode] = useState('Creative');
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isVoiceActive, setIsVoiceActive] = useState(false);
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null); // Naya ref text box ke liye
-
-  useEffect(() => { 
-    const timer = setTimeout(() => {
-      scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); 
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [messages, loading]);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const voiceAgentRef = useRef<VoiceAgent | null>(null);
+  const [storyIndex, setStoryIndex] = useState(0);
+  
+  // Backend URL helper
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://muse-backend-production-29cd.up.railway.app';
+  
+  // Dynamic welcome message - AI will guide the conversation
+  const getWelcomeMessage = (clientName: string) => {
+    return `Hey ${clientName}, thanks for sitting down with me. Let's start from the beginning - tell me about where you grew up.`;
+  };
 
   useEffect(() => {
-    return () => {
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-    };
+    voiceAgentRef.current = new VoiceAgent({
+      onListeningChange: setIsListening,
+      onSpeakingChange: setIsSpeaking,
+      onTranscript: setInput,
+      onFinalTranscript: (text) => handleSend(text),
+      onError: (error) => console.error('Voice error:', error)
+    });
+    // Removed setStopRecognitionOnSpeak - not needed anymore
+    voiceAgentRef.current.setSilenceMs(1200);
+    voiceAgentRef.current.setLanguage('en-US');
+    voiceAgentRef.current.setVoice({ rate: 0.9, pitch: 1.02, volume: 1.0 });
+    return () => voiceAgentRef.current?.stop();
   }, []);
 
   useEffect(() => {
-    const saved = localStorage.getItem('user_muse');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setUser(parsed);
-      loadSessions(parsed.id);
+    // Check if already authenticated with valid token
+    const token = localStorage.getItem('muse_publisher_token');
+    
+    if (token) {
+      // Verify token with backend
+      fetch(`${BACKEND_URL}/api/publisher/verify`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setUser({
+            name: data.user.name,
+            id: data.user.id,
+            role: data.user.role
+          });
+          setIsPublisher(true);
+          setShowAuth(false);
+          loadClientsFromBackend();
+        } else {
+          // Invalid token
+          localStorage.removeItem('muse_publisher_token');
+        }
+      })
+      .catch(() => {
+        // Token verification failed
+        localStorage.removeItem('muse_publisher_token');
+      });
+    }
+    
+    const savedTheme = localStorage.getItem('muse_theme') as 'light' | 'dark';
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     }
   }, []);
 
-  const loadSessions = async (userId: string) => {
+  const loadClientsFromBackend = async () => {
+    // Load from localStorage (primary storage)
+    const savedClients = localStorage.getItem('muse_clients');
+    if (savedClients) {
+      setClients(JSON.parse(savedClients));
+    }
+    
+    // Try backend sync in background (optional)
     try {
-      const res = await axios.get(`https://muse-backend-production-29cd.up.railway.app/api/sessions/${userId}`);
-      setSessions(res.data);
-    } catch (err) { console.error("Sessions load fail"); }
+      const res = await axios.get(`${BACKEND_URL}/api/clients?publisherId=publisher_1`);
+      
+      if (res.data.success && res.data.clients.length > 0) {
+        setClients(res.data.clients);
+        localStorage.setItem('muse_clients', JSON.stringify(res.data.clients));
+      }
+    } catch (error) {
+      // Silently fail - localStorage is primary storage
+      console.log('Using localStorage (backend optional)');
+    }
   };
 
-  const loadSessionHistory = async (sessionId: string) => {
-    setLoading(true);
-    setIsMobileMenuOpen(false); 
+  // Handle publisher login with backend verification
+  const handlePublisherLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError('');
+    
     try {
-      const res = await axios.get(`https://muse-backend-production-29cd.up.railway.app/api/history/${sessionId}`);
-      setCurrentSessionId(sessionId);
+      // Send password to backend for verification
+      const res = await fetch(`${BACKEND_URL}/api/publisher/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
       
-      let reconstructedDraft = "";
-      const history = res.data.map((h: any) => {
-        let text = h.content;
-        if (h.role === 'ai') {
-          const draftMatch = text.match(/\[START_DRAFT\]([\s\S]*?)\[END_DRAFT\]/i);
-          if (draftMatch) {
-            reconstructedDraft += "\n\n" + draftMatch[1].trim();
-            text = text.replace(/\[START_DRAFT\][\s\S]*?\[END_DRAFT\]/i, '').trim();
+      const data = await res.json();
+      
+      if (data.success) {
+        // Save JWT token
+        localStorage.setItem('muse_publisher_token', data.token);
+        
+        // Set user state
+        setUser({
+          name: data.user.name,
+          id: data.user.id,
+          role: data.user.role
+        });
+        setIsPublisher(true);
+        setShowAuth(false);
+        setPassword('');
+        loadClientsFromBackend();
+      } else {
+        // Wrong password
+        setAuthError(data.error || 'Invalid password');
+        setPassword('');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setAuthError('Connection error. Please try again.');
+      setPassword('');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('muse_publisher_token');
+    setUser(null);
+    setIsPublisher(false);
+    setShowAuth(true);
+    setPassword('');
+    setAuthError('');
+  };
+
+  // Removed localStorage sync - now using backend
+
+  useEffect(() => {
+    if (selectedClientId) {
+      const client = clients.find(c => c.id === selectedClientId);
+      if (client) {
+        setMessages(client.messages || []);
+        setBookDraft(client.bookDraft || '');
+      }
+    }
+  }, [selectedClientId, clients]);
+
+  const handleSend = async (textToSend: string) => {
+    if (!textToSend.trim() || loading) return;
+    if (voiceAgentRef.current && isListening) voiceAgentRef.current.stopListening();
+
+    const newMsgs: Message[] = [...messages, { role: 'user', text: textToSend }];
+    setMessages(newMsgs);
+    setInput('');
+    setLoading(true);
+
+    try {
+      const client = clients.find(c => c.id === selectedClientId);
+      const athleteSport = client?.sport || 'general';
+      
+      const res = await axios.post(`${BACKEND_URL}/api/chat`, {
+        message: textToSend,
+        userId: selectedClientId || user?.id || null,
+        history: messages,
+        mode: 'Creative',
+        sport: athleteSport
+      });
+
+      // ✅ USE BACKEND RESPONSE (Kelly Cole style from AI)
+      const aiReply = res.data.reply || "Tell me more about that.";
+
+      const updatedMsgs: Message[] = [...newMsgs, { role: 'ai', text: aiReply }];
+      setMessages(updatedMsgs);
+
+      const newDraftContent = `**User:** ${textToSend}\n\n**AI:** ${aiReply}`;
+      const updatedDraft = bookDraft ? bookDraft + "\n\n---\n\n" + newDraftContent : newDraftContent;
+      setBookDraft(updatedDraft);
+
+      if (isPublisher && selectedClientId) updateClientProgress(selectedClientId, updatedMsgs, updatedDraft);
+      if (voiceAgentRef.current?.isVoiceActive()) {
+        voiceAgentRef.current.enqueueSpeak(aiReply);
+        voiceAgentRef.current.completeProcessing();
+      }
+    } catch (err) {
+      console.error('Send error:', err);
+      const errorMsg = "I'm having trouble connecting. Let's try again.";
+      setMessages([...newMsgs, { role: 'ai', text: errorMsg }]);
+      if (voiceAgentRef.current?.isVoiceActive()) {
+        voiceAgentRef.current.speak(errorMsg);
+        voiceAgentRef.current.completeProcessing();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateClientProgress = async (clientId: string, msgs: Message[], draft: string) => {
+    const wordCount = draft.split(/\s+/).filter(w => w.length > 0).length;
+    const progress = Math.min(Math.floor(wordCount / 50), 100);
+    
+    const updatedClients = clients.map(c =>
+      c.id === clientId ? {
+        ...c, messages: msgs, bookDraft: draft, wordCount, progress,
+        status: (progress >= 100 ? 'completed' : 'active') as 'completed' | 'active' | 'pending',
+        lastActive: new Date().toISOString()
+      } : c
+    );
+    
+    setClients(updatedClients);
+    localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
+    
+    try {
+      await axios.put(`${BACKEND_URL}/api/clients/${clientId}`, {
+        messages: msgs,
+        bookDraft: draft,
+        wordCount,
+        progress,
+        status: progress >= 100 ? 'completed' : 'active'
+      });
+    } catch (error: any) {
+      const status = error?.response?.status;
+      if (status === 404) {
+        const c = clients.find(x => x.id === clientId);
+        if (c) {
+          try {
+            const createRes = await axios.post(`${BACKEND_URL}/api/clients`, {
+              name: c.name,
+              email: c.email,
+              bookTitle: c.bookTitle,
+              sport: c.sport || 'baseball',
+              publisherId: user?.id || 'publisher_1'
+            });
+            const serverClient = createRes.data?.client;
+            if (serverClient) {
+              const reconciled = clients.map(x => x.id === clientId ? { ...x, id: serverClient.id, uniqueLink: serverClient.uniqueLink } : x);
+              setClients(reconciled);
+              localStorage.setItem('muse_clients', JSON.stringify(reconciled));
+              setSelectedClientId(serverClient.id);
+              await axios.put(`${BACKEND_URL}/api/clients/${serverClient.id}`, {
+                messages: msgs,
+                bookDraft: draft,
+                wordCount,
+                progress,
+                status: progress >= 100 ? 'completed' : 'active'
+              });
+            }
+          } catch (e) {
+            console.warn('Recreate+update client failed, keeping local only:', e);
           }
         }
-        return { role: h.role === 'ai' ? 'ai' : 'user', text };
-      });
-
-      setMessages(history);
-      if (reconstructedDraft) {
-        setBookDraft(reconstructedDraft.trim());
       } else {
-        setBookDraft(""); 
+        console.warn('Update client error (using localStorage):', error);
       }
-    } catch (err) { console.error("History load fail"); }
-    setLoading(false);
-  };
-
-  const handleSend = async (overrideInput?: string) => {
-    const textToSend = overrideInput || input;
-    if (!textToSend.trim() || loading) return;
-
-    const newMsgs = [...messages, { role: 'user', text: textToSend } as const];
-    setMessages(newMsgs);
-    
-    // Yahan text input clear ho raha hai aur size wapas chota ho raha hai
-    setInput('');
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'; 
-    }
-    
-    setLoading(true);
-
-    try {
-      const res = await axios.post('https://muse-backend-production-29cd.up.railway.app/api/chat', {
-        message: textToSend,
-        userId: user ? user.id : null,
-        history: messages,
-        sessionId: currentSessionId,
-        mode: writingMode
-      });
-      
-      let aiReply = res.data.reply;
-      aiReply = aiReply.replace(/\[START_DRAFT\]/gi, '').replace(/\[END_DRAFT\]/gi, '').trim();
-
-      setMessages([...newMsgs, { role: 'ai', text: aiReply }]);
-      
-      // AUTO-ADD FEATURE (Perfect for book writing)
-      const newDraftContent = `**User:** ${textToSend}\n\n**Muse:** ${aiReply}`;
-      setBookDraft(prev => prev ? prev + "\n\n---\n\n" + newDraftContent : newDraftContent);
-
-      if (!currentSessionId) {
-        setCurrentSessionId(res.data.sessionId);
-        if (user) loadSessions(user.id);
-      }
-    } catch (err: any) { 
-      const errorMsg = err.response?.data?.details || err.response?.data?.error || "Connection Failed";
-      alert(`API Error: ${errorMsg}`); 
-    } finally { 
-      setLoading(false); 
     }
   };
 
-  const handleDigDeeper = () => {
-      handleSend("Please ask me a specific, highly thought-provoking question to dig deeper into the core emotions and details of what I just shared.");
-  };
-
-  const deleteSession = async (e: React.MouseEvent, sid: string) => {
-    e.stopPropagation(); e.preventDefault();
-    if (!confirm("Delete permanently?")) return;
-    try {
-      await axios.delete(`https://muse-backend-production-29cd.up.railway.app/api/sessions/${sid}`);
-      if (user) loadSessions(user.id);
-      if (currentSessionId === sid) startNewChat();
-    } catch (err) { alert("Delete failed"); }
-  };
-
-  const handleSpeak = (text: string, index: number) => {
-    if (!window.speechSynthesis) return alert("Browser not supported");
-    if (speakingIndex === index) {
-      window.speechSynthesis.cancel();
-      setSpeakingIndex(null);
-      return;
+  const toggleVoiceAgent = () => {
+    if (isVoiceActive) {
+      voiceAgentRef.current?.stop();
+      setIsVoiceActive(false);
+    } else {
+      const client = clients.find(c => c.id === selectedClientId);
+      const clientName = isPublisher ? client?.name : user?.name;
+      const welcomeMsg = getWelcomeMessage(clientName || 'there');
+      voiceAgentRef.current?.start(welcomeMsg);
+      setIsVoiceActive(true);
+      setMessages([{ role: 'ai', text: welcomeMsg }]);
     }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    setSpeakingIndex(index);
-    window.speechSynthesis.speak(utterance);
   };
 
   const toggleListening = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("Voice recognition not supported.");
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    if (isListening) { setIsListening(false); recognition.stop(); }
-    else {
-      setIsListening(true); recognition.start();
-      recognition.onresult = (e: any) => {
-        const transcript = e.results[0][0].transcript;
-        setInput(prev => {
-           const newVal = prev + (prev ? " " : "") + transcript;
-           // Automatically resize text box when voice finishes
-           if (textareaRef.current) {
-             textareaRef.current.style.height = 'auto';
-             textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-           }
-           return newVal;
-        });
-        setIsListening(false);
-      };
-      recognition.onerror = () => setIsListening(false);
+    if (isListening) voiceAgentRef.current?.stopListening();
+    else voiceAgentRef.current?.startListening();
+  };
+
+  const handleSpeak = (text: string, index: number) => {
+    if (speakingIndex === index) {
+      window.speechSynthesis.cancel();
+      setSpeakingIndex(null);
+    } else {
+      setSpeakingIndex(index);
+      voiceAgentRef.current?.speak(text, () => setSpeakingIndex(null));
     }
   };
 
-  const startNewChat = () => {
-    setMessages([]);
-    setCurrentSessionId(null);
-    setBookDraft("");
-    setInput("");
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
-    setIsMobileMenuOpen(false);
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    setSpeakingIndex(null);
-  };
+  const handleAddClient = async () => {
+    if (!newClientName || !newClientEmail || !newClientBook) {
+      alert('Please fill all fields');
+      return;
+    }
 
-  const handleAuth = async () => {
+    // Try backend first to get canonical id + link
     try {
-      if (isReset) {
-        await axios.post('https://muse-backend-production-29cd.up.railway.app/api/auth/reset-password', { email: authForm.email, newPassword: authForm.password });
-        alert("Success! Login now.");
-        setIsReset(false); setIsLogin(true);
+      const res = await axios.post(`${BACKEND_URL}/api/clients`, {
+        name: newClientName,
+        email: newClientEmail,
+        bookTitle: newClientBook,
+        sport: newClientSport,
+        publisherId: user?.id || 'publisher_1'
+      });
+      if (res.data?.success && res.data?.client) {
+        const serverClient: Client = res.data.client;
+        const updated = [...clients, serverClient];
+        setClients(updated);
+        localStorage.setItem('muse_clients', JSON.stringify(updated));
+        setNewClientName('');
+        setNewClientEmail('');
+        setNewClientBook('');
+        setNewClientSport('baseball');
+        setShowAddClient(false);
+        navigator.clipboard.writeText(serverClient.uniqueLink);
+        alert(`Client ${serverClient.name} added!\n\nLink copied to clipboard.`);
         return;
       }
-      const path = isLogin ? '/api/auth/login' : '/api/auth/signup';
-      const res = await axios.post(`https://muse-backend-production-29cd.up.railway.app${path}`, authForm);
-      const data = { name: res.data.name, id: res.data.id };
-      setUser(data);
-      localStorage.setItem('user_muse', JSON.stringify(data));
-      loadSessions(data.id);
-      setShowAuth(false);
-    } catch (err) { alert("Authentication failed."); }
+    } catch (error) {
+      console.log('Backend unavailable, falling back to local client');
+    }
+    
+    // Fallback: local-only client
+    const clientId = `client_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || window.location.origin;
+    const uniqueLink = `${frontendUrl}/interview/${clientId}?name=${encodeURIComponent(newClientName)}&book=${encodeURIComponent(newClientBook)}&sport=${newClientSport}`;
+    const localClient: Client = {
+      id: clientId,
+      name: newClientName,
+      email: newClientEmail,
+      bookTitle: newClientBook,
+      sport: newClientSport,
+      uniqueLink,
+      sessionId: null,
+      lastActive: new Date().toISOString(),
+      status: 'pending',
+      progress: 0,
+      messages: [],
+      bookDraft: '',
+      wordCount: 0
+    };
+    const updatedClients = [...clients, localClient];
+    setClients(updatedClients);
+    localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
+    
+    setNewClientName('');
+    setNewClientEmail('');
+    setNewClientBook('');
+    setNewClientSport('cricket');
+    setShowAddClient(false);
+    navigator.clipboard.writeText(uniqueLink);
+    alert(`Client ${newClientName} added!\n\nLink copied to clipboard.\n\nNote: Share this link - it will work on any device!`);
   };
 
-  const handleGoogleAuth = async (accessToken: string) => {
-    try {
-      const res = await axios.post('https://muse-backend-production-29cd.up.railway.app/api/auth/google', { token: accessToken });
-      const data = { name: res.data.name, id: res.data.id };
-      setUser(data);
-      localStorage.setItem('user_muse', JSON.stringify(data));
-      loadSessions(data.id);
-      setShowAuth(false);
-    } catch (err) { alert("Google Authentication failed."); }
-  };
-
-  const downloadTXT = () => {
-    if(!bookDraft) return alert("Manuscript is empty.");
-    const blob = new Blob([bookDraft], { type: 'text/plain;charset=utf-8' });
-    saveAs(blob, `Manuscript_${Date.now()}.txt`);
-  };
-
-  const downloadPDF = () => {
-    if(!bookDraft) return alert("Manuscript is empty.");
-    const doc = new jsPDF();
-    doc.setFont("times", "bold").text("My Manuscript", 20, 20);
-    doc.setFont("times", "normal").setFontSize(12);
-    const split = doc.splitTextToSize(bookDraft.replace(/[#*]/g, ''), 170);
-    doc.text(split, 20, 30);
-    doc.save(`Manuscript_${Date.now()}.pdf`);
-  };
-
-  const themeClasses = {
-    bg: theme === 'dark' ? 'bg-[#0a0a0a]' : 'bg-[#ffffff]',
-    sidebar: theme === 'dark' ? 'bg-[#121212]' : 'bg-[#f9f9fb]',
-    text: theme === 'dark' ? 'text-gray-200' : 'text-gray-800',
-    border: theme === 'dark' ? 'border-[#222]' : 'border-gray-200/60',
-    inputBg: theme === 'dark' ? 'bg-[#1a1a1a]' : 'bg-white',
-  };
-
-  return (
-    <div className={`flex h-screen w-full ${themeClasses.bg} ${themeClasses.text} font-sans transition-colors duration-300 overflow-hidden relative selection:bg-blue-500/20`}>
+  const handleSelectClient = (clientId: string) => setSelectedClientId(clientId);
+  const handleDeleteClient = async (clientId: string) => {
+    if (confirm('Delete this client and all their data?')) {
+      const updatedClients = clients.filter(c => c.id !== clientId);
+      setClients(updatedClients);
+      localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
       
-      {/* Mobile Sidebar Overlay */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/50 z-[60] md:hidden backdrop-blur-sm transition-opacity" onClick={() => setIsMobileMenuOpen(false)} />
-      )}
+      if (selectedClientId === clientId) {
+        setSelectedClientId(null);
+        setMessages([]);
+        setBookDraft('');
+      }
+      
+      try {
+        await axios.delete(`${BACKEND_URL}/api/clients/${clientId}`);
+      } catch (error) {
+        console.error('Delete client error (deleted locally):', error);
+      }
+    }
+  };
 
-      {/* Modern, Slim Sidebar */}
-      {!zenMode && (
-        <aside className={`fixed md:relative z-[70] h-full w-[260px] ${themeClasses.sidebar} border-r ${themeClasses.border} flex flex-col transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} md:translate-x-0 shrink-0`}>
-          
-          <div className="p-5 flex items-center justify-between border-b border-transparent">
-            <div className="flex items-center gap-2.5 select-none">
-              <div className="bg-blue-600 p-1.5 rounded-md flex items-center justify-center">
-                  <PenLine size={16} className="text-white" />
-              </div>
-              <h1 className="font-bold text-[17px] tracking-tight text-gray-900 dark:text-white">Muse <span className="text-gray-400 font-normal">AI</span></h1>
+  const handleCopyLink = (link: string) => {
+    navigator.clipboard.writeText(link);
+    alert('Link copied to clipboard!');
+  };
+
+  const handleSendEmail = (email: string, link: string) => {
+    const subject = encodeURIComponent('Your Book Interview Link');
+    const body = encodeURIComponent(`Dear Client,\n\nHere is your personal interview link:\n\n${link}\n\nClick the link to start your book interview.\n\nBest regards`);
+    window.open(`mailto:${email}?subject=${subject}&body=${body}`);
+  };
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('muse_theme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
+
+  const wordCount = bookDraft.split(/\s+/).filter(w => w.length > 0).length;
+
+  // Show simple password screen for publisher
+  if (showAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 p-4">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl">
+              <span className="text-4xl text-white font-bold">M</span>
             </div>
-            <button className="md:hidden text-gray-500 hover:text-gray-800 dark:hover:text-white" onClick={() => setIsMobileMenuOpen(false)}>
-              <X size={18}/>
-            </button>
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Muse Publisher
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Enter password to access dashboard
+            </p>
           </div>
 
-          <div className="px-3 pt-2">
-            <button onClick={startNewChat} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-all duration-200 w-full font-medium text-[13px] shadow-sm active:scale-95">
-              <Plus size={16} /> Start Writing
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto space-y-0.5 mt-4 px-3 custom-scrollbar">
-            <p className="text-[11px] text-gray-400 font-semibold uppercase tracking-wider px-2 mb-2 select-none">Recent Drafts</p>
-            {sessions.map((s, i) => (
-              <div key={i} className="group relative flex items-center">
-                <button
-                  onClick={() => loadSessionHistory(s.sessionId)}
-                  className={`flex items-center gap-2.5 p-2 w-full rounded-md text-left text-[13px] transition-all duration-200 ${currentSessionId === s.sessionId ? 'bg-gray-200/50 dark:bg-white/10 text-gray-900 dark:text-white font-medium' : `hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-400`}`}
-                >
-                  <MessageSquare size={14} className={currentSessionId === s.sessionId ? "text-gray-900 dark:text-gray-300" : "text-gray-400"} />
-                  <span className="truncate flex-1">{s.content}</span>
-                </button>
-                <button onClick={(e) => deleteSession(e, s.sessionId)} className="absolute right-1 p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all bg-gray-100 dark:bg-[#1a1a1a] rounded shadow-sm">
-                  <Trash2 size={12} />
-                </button>
-              </div>
-            ))}
-            {!user && sessions.length === 0 && (
-                <div className="p-4 mt-2 bg-transparent text-center select-none">
-                    <p className="text-[12px] text-gray-400">Sign in to sync your drafts.</p>
-                </div>
-            )}
-          </div>
-
-          <div className="p-4 border-t border-gray-200/60 dark:border-[#222]">
-              <div className="flex gap-2">
-                <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className={`flex items-center justify-center p-2 rounded-lg border ${themeClasses.border} bg-white dark:bg-[#111] hover:bg-gray-50 dark:hover:bg-[#222] transition-colors`} title="Toggle Theme">
-                    {theme === 'dark' ? <Sun size={16} className="text-gray-400" /> : <Moon size={16} className="text-gray-600" />}
-                </button>
-                {user ? (
-                    <button onClick={() => {localStorage.clear(); window.location.reload();}} className={`flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border ${themeClasses.border} bg-white dark:bg-[#111] hover:bg-gray-50 dark:hover:bg-[#222] text-gray-600 dark:text-gray-300 text-[13px] font-medium transition-colors`} title="Logout">
-                        <LogOut size={14} className="text-gray-400"/> Logout
-                    </button>
-                ) : (
-                    <button onClick={() => {setShowAuth(true); setIsMobileMenuOpen(false);}} className={`flex-1 flex items-center justify-center gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#111] hover:bg-gray-50 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 text-[13px] font-medium transition-colors`}>
-                        Sign In
-                    </button>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8">
+            <form onSubmit={handlePublisherLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter publisher password"
+                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+                  autoFocus
+                />
+                {authError && (
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">{authError}</p>
                 )}
               </div>
-          </div>
-        </aside>
-      )}
 
-      {/* Main Chat Area */}
-      <div className={`flex-1 flex flex-col relative ${isDraftOpen ? 'hidden md:flex md:w-[50%]' : 'flex w-full'}`}>
-        
-        {/* Sleek Topbar */}
-        <header className={`h-14 flex-shrink-0 px-4 md:px-6 border-b ${themeClasses.border} flex justify-between items-center bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-md z-30`}>
-          <div className="flex items-center gap-3">
-            {!zenMode && (
-              <button className="md:hidden p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-white/5 transition" onClick={() => setIsMobileMenuOpen(true)}>
-                <Menu size={18} />
-              </button>
-            )}
-            <button onClick={() => setZenMode(!zenMode)} className={`hidden md:flex p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 transition`} title="Focus Mode">
-                {zenMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            </button>
-            
-            <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#222] px-2 py-1 rounded-md">
-              <Settings size={12} className="text-gray-400" />
-              <select
-                  value={writingMode}
-                  onChange={(e) => setWritingMode(e.target.value)}
-                  className={`bg-transparent text-[12px] font-medium rounded outline-none cursor-pointer text-gray-600 dark:text-gray-300`}
-              >
-                  <option value="Creative" className="bg-white dark:bg-[#111]">Creative</option>
-                  <option value="Professional" className="bg-white dark:bg-[#111]">Professional</option>
-                  <option value="Memoir" className="bg-white dark:bg-[#111]">Memoir</option>
-              </select>
-            </div>
-          </div>
-
-          <button onClick={() => setIsDraftOpen(!isDraftOpen)} className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors font-medium text-[12px] ${isDraftOpen ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#222]'}`}>
-            <BookOpen size={14} />
-            <span>Manuscript</span>
-          </button>
-        </header>
-
-        {/* Clean Chat Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-40 scroll-smooth custom-scrollbar relative">
-          
-          {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center select-none max-w-lg mx-auto px-4 animate-in fade-in duration-500">
-              <div className="bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#222] p-4 rounded-xl mb-6 shadow-sm">
-                  <Sparkles size={24} className="text-blue-500" />
-              </div>
-              <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-2 tracking-tight">Craft your story.</h2>
-              <p className="text-[14px] md:text-[15px] text-gray-500 dark:text-gray-400 mb-8 max-w-md">
-                Talk to me naturally. Everything we discuss is automatically structured and added to your manuscript.
-              </p>
-              
-              <div className="w-full flex justify-center">
-                <button onClick={() => handleSend("Let's start. Ask me the first question about my background.")} className={`px-5 py-3 rounded-lg bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 transition-all font-medium text-[14px] shadow-sm active:scale-95 flex items-center gap-2`}>
-                  Start Interview <ChevronRight size={16}/>
-                </button>
-              </div>
-            </div>
-          )}
-          
-          <div className="max-w-3xl mx-auto space-y-6">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 fade-in duration-300`}>
-                <div className={`p-4 md:p-5 max-w-[85%] leading-relaxed text-[14px] md:text-[15px] ${
-                  m.role === 'user' 
-                    ? 'bg-[#f0f0f0] dark:bg-[#222] text-gray-900 dark:text-gray-100 rounded-2xl rounded-tr-sm' 
-                    : `bg-transparent text-gray-800 dark:text-gray-200 w-full`
-                }`}>
-                  
-                  <div className={`prose prose-sm md:prose-base max-w-none ${m.role === 'user' ? 'dark:prose-invert' : 'prose-blue dark:prose-invert'}`}>
-                    <ReactMarkdown>{m.text}</ReactMarkdown>
-                  </div>
-                  
-                  {m.role === 'ai' && (
-                    <div className="mt-3 flex items-center gap-3">
-                      <button
-                        onClick={() => handleSpeak(m.text, i)}
-                        className="flex items-center gap-1.5 text-[12px] font-medium text-gray-400 hover:text-blue-500 transition-colors"
-                      >
-                        {speakingIndex === i ? (
-                          <><VolumeX size={14}/> Stop</>
-                        ) : (
-                          <><Volume2 size={14}/> Read</>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {loading && (
-              <div className="flex items-center gap-3 text-gray-400 text-[13px] font-medium ml-4 p-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-75"></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce delay-150"></div>
-              </div>
-            )}
-          </div>
-          
-          <div className="h-32 w-full shrink-0"></div>
-          <div ref={scrollRef} />
-        </main>
-
-        {/* Dynamic & Resizing Input Dock */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent dark:from-[#0a0a0a] dark:via-[#0a0a0a] z-40">
-          <div className="max-w-3xl mx-auto">
-            
-            {messages.length > 0 && !loading && (
-                <div className="flex justify-center mb-3">
-                    <button onClick={handleDigDeeper} className="flex items-center gap-1.5 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#333] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] text-gray-600 dark:text-gray-300 text-[12px] font-medium px-4 py-2 rounded-full transition-all shadow-sm">
-                        <Telescope size={14} className="text-gray-400"/> Ask me more
-                    </button>
-                </div>
-            )}
-
-            {!user && messages.length > 0 && (
-              <div className="mb-2 flex items-center justify-center gap-1.5 text-[12px] text-gray-500 font-medium">
-                <AlertTriangle size={14} className="text-yellow-500" /> Guest session. <span onClick={() => setShowAuth(true)} className="underline cursor-pointer hover:text-gray-800 dark:hover:text-white">Sign in to save.</span>
-              </div>
-            )}
-
-            <div className={`relative flex items-end gap-2 ${themeClasses.inputBg} border ${themeClasses.border} rounded-xl p-1.5 shadow-sm focus-within:border-gray-400 dark:focus-within:border-gray-600 transition-colors`}>
               <button
-                onClick={toggleListening}
-                className={`p-2.5 rounded-lg transition-colors shrink-0 ${isListening ? 'bg-red-50 dark:bg-red-500/10 text-red-500 animate-pulse' : 'text-gray-400 hover:bg-gray-100 dark:hover:bg-[#222]'}`}
+                type="submit"
+                disabled={authLoading}
+                className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isListening ? <Mic size={18} /> : <MicOff size={18} />}
+                {authLoading ? 'Verifying...' : 'Access Dashboard'}
               </button>
-              
-              {/* AUTO RESIZING TEXTAREA FOR BOOK WRITING */}
-              <textarea
-                ref={textareaRef}
-                className={`flex-1 bg-transparent border-none outline-none py-2.5 px-1 text-[14px] md:text-[15px] resize-none custom-scrollbar text-gray-900 dark:text-gray-100 placeholder:text-gray-400`}
-                placeholder="Share your story or answer the interview question in detail..."
-                value={input}
-                onChange={(e) => {
-                  setInput(e.target.value);
-                  // Text box ko dynamically adjust karna 
-                  e.target.style.height = 'auto';
-                  e.target.style.height = `${Math.min(e.target.scrollHeight, 250)}px`;
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                rows={1}
-                style={{ minHeight: '40px', maxHeight: '250px' }}
-              />
-
-              <button onClick={() => handleSend()} className="p-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all active:scale-95 shrink-0">
-                <Send size={16}/>
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Elegant Manuscript Panel */}
-      {isDraftOpen && (
-        <div className={`absolute inset-0 md:relative md:inset-auto z-[60] w-full md:w-[45%] flex flex-col bg-white dark:bg-[#0a0a0a] border-l ${themeClasses.border} shadow-2xl md:shadow-none animate-in slide-in-from-right duration-300 shrink-0`}>
-          <header className={`h-14 px-4 md:px-6 border-b ${themeClasses.border} flex justify-between items-center bg-transparent`}>
-            <div className="flex items-center gap-2">
-              <button className="md:hidden p-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-[#222] rounded-md transition" onClick={() => setIsDraftOpen(false)}>
-                <ChevronRight size={18} />
-              </button>
-              <h2 className="font-semibold text-[14px] text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                Manuscript
-                <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-              </h2>
-            </div>
-            <div className="flex items-center gap-1">
-              <button onClick={downloadPDF} className="px-2 py-1 text-[12px] text-gray-500 hover:bg-gray-100 dark:hover:bg-[#222] rounded transition-colors font-medium">PDF</button>
-              <button onClick={downloadTXT} className="px-2 py-1 text-[12px] text-gray-500 hover:bg-gray-100 dark:hover:bg-[#222] rounded transition-colors font-medium">TXT</button>
-              <span className="text-gray-300 dark:text-gray-700 mx-1">|</span>
-              <button onClick={() => { if(confirm("Clear the entire manuscript?")) setBookDraft(""); }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"><Trash2 size={14} /></button>
-            </div>
-          </header>
-          
-          <div className="flex-1 p-6 md:p-12 overflow-y-auto custom-scrollbar bg-white dark:bg-[#0a0a0a]">
-              <textarea
-                className={`w-full h-full bg-transparent outline-none resize-none font-serif text-[16px] md:text-[18px] leading-[1.8] text-gray-800 dark:text-gray-200 placeholder:text-gray-300 dark:placeholder:text-[#333]`}
-                placeholder="Your drafted content will appear here..."
-                value={bookDraft}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBookDraft(e.target.value)}
-              />
+  return (
+    <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
+      <div className="h-14 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sm:px-6 z-10 glass-ultra">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 hdr-gradient-blue rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-ultra neon-blue">
+            M
+          </div>
+          <div>
+            <span className="font-bold text-lg text-gradient-animate">Muse</span>
+            <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs rounded-full font-medium">Publisher</span>
           </div>
         </div>
-      )}
+        <div className="flex items-center gap-2">
+          {selectedClientId && (
+            <button onClick={() => setSelectedClientId(null)} className="px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all hover-lift">
+              ← Dashboard
+            </button>
+          )}
+          <button onClick={toggleTheme} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all hover-lift">
+            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
+          <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all hover-lift text-sm">
+            <LogOut size={16} />
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
 
-      {/* Clean Auth Modal */}
-      {showAuth && (
-        <div className="fixed inset-0 bg-black/40 dark:bg-black/80 flex items-center justify-center p-4 z-[100] backdrop-blur-sm transition-all">
-           <div className="bg-white dark:bg-[#111] p-8 rounded-2xl w-full max-w-[400px] border border-gray-200/60 dark:border-[#222] shadow-2xl relative animate-in zoom-in-95 duration-200">
-           
-           <button onClick={() => setShowAuth(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 dark:hover:text-white p-2 rounded-md"><X size={16}/></button>
+      <main className="flex-1 overflow-hidden">
+        {selectedClientId ? (
+          <ClientInterview
+            clientName={clients.find(c => c.id === selectedClientId)?.name || ''}
+            bookTitle={clients.find(c => c.id === selectedClientId)?.bookTitle || ''}
+            messages={messages} input={input} loading={loading}
+            isListening={isListening} isSpeaking={isSpeaking} isVoiceActive={isVoiceActive}
+            wordCount={wordCount} bookDraft={bookDraft}
+            onSend={handleSend} onInputChange={setInput}
+            onToggleVoice={toggleVoiceAgent} onToggleListening={toggleListening}
+            onSpeak={handleSpeak} speakingIndex={speakingIndex}
+          />
+        ) : (
+          <PublisherDashboard
+            clients={clients} onSelectClient={handleSelectClient}
+            onAddClient={() => setShowAddClient(true)} onDeleteClient={handleDeleteClient}
+            onCopyLink={handleCopyLink} onSendEmail={handleSendEmail}
+            selectedClientId={selectedClientId}
+          />
+        )}
+      </main>
 
-           <div className="mb-6">
-             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1 tracking-tight">
-                 {isReset ? 'Reset Password' : isLogin ? 'Welcome back' : 'Create an account'}
-             </h2>
-             <p className="text-[13px] text-gray-500">Securely sync your workspace.</p>
-           </div>
-
-           <div className="space-y-3">
-             {!isLogin && !isReset && <input placeholder="Full Name" className="w-full p-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-lg outline-none focus:border-gray-400 transition-colors text-[14px]" onChange={(e) => setAuthForm({...authForm, name: e.target.value})}/>}
-             <input placeholder="Email Address" className="w-full p-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-lg outline-none focus:border-gray-400 transition-colors text-[14px]" onChange={(e) => setAuthForm({...authForm, email: e.target.value})}/>
-             <input type="password" placeholder="Password" className="w-full p-3 bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#333] rounded-lg outline-none focus:border-gray-400 transition-colors text-[14px]" onChange={(e) => setAuthForm({...authForm, password: e.target.value})}/>
-             
-             <button onClick={handleAuth} className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 p-3 rounded-lg font-medium text-[14px] mt-2 transition-all active:scale-[0.98]">
-                {isLogin ? "Sign In" : "Continue"}
-             </button>
-             
-             <div className="relative py-4">
-                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200 dark:border-[#333]"></div></div>
-                <div className="relative flex justify-center"><span className="bg-white dark:bg-[#111] px-3 text-[11px] font-medium text-gray-400">OR</span></div>
-             </div>
-             
-             <GoogleOAuthProvider clientId="691831191491-8dff26vujkmstq9do9sr7n32o6ghmmam.apps.googleusercontent.com">
-                <GoogleLoginButton onSuccess={handleGoogleAuth} />
-             </GoogleOAuthProvider>
-
-             <p onClick={() => setIsLogin(!isLogin)} className="text-center text-[13px] text-gray-500 hover:text-gray-800 dark:hover:text-white mt-4 cursor-pointer transition-colors">
-                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-             </p>
-           </div>
-         </div>
-       </div>
+      {showAddClient && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-800 shadow-ultra glass-ultra">
+            <h2 className="text-2xl font-bold mb-6 text-gradient-animate">Add New Client</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Client Name</label>
+                <input type="text" value={newClientName} onChange={(e) => setNewClientName(e.target.value)} placeholder="John Doe"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Email</label>
+                <input type="email" value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} placeholder="john@example.com"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Book Title</label>
+                <input type="text" value={newClientBook} onChange={(e) => setNewClientBook(e.target.value)} placeholder="My Amazing Story"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Sport</label>
+                <select value={newClientSport} onChange={(e) => setNewClientSport(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                  <option value="baseball">Baseball ⚾</option>
+                  <option value="football">Football 🏈</option>
+                  <option value="basketball">Basketball 🏀</option>
+                  <option value="cricket">Cricket 🏏</option>
+                  <option value="boxing">Boxing 🥊</option>
+                  <option value="athletics">Athletics 🏃</option>
+                  <option value="tennis">Tennis 🎾</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowAddClient(false)}
+                className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all hover-lift">
+                Cancel
+              </button>
+              <button onClick={handleAddClient}
+                className="flex-1 px-4 py-3 hdr-gradient-blue text-white rounded-xl hover:shadow-lg transition-all hover-lift-ultra neon-blue">
+                Add Client
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
 }
+ 
