@@ -240,16 +240,12 @@ export default function ClientInterviewPage({ params }: PageProps) {
       voiceAgentRef.current?.stop();
       setIsVoiceActive(false);
     } else {
-      // Check if interview already started (has messages)
-      if (messages.length > 0) {
-        // Interview already in progress - just start listening, don't speak welcome
-        voiceAgentRef.current?.startListening();
-        setIsVoiceActive(true);
-      } else {
-        // Fresh start - speak welcome message
-        const welcomeMsg = getWelcomeMessage(client?.name || 'there');
-        voiceAgentRef.current?.start(welcomeMsg);
-        setIsVoiceActive(true);
+      const welcomeMsg = getWelcomeMessage(client?.name || 'there');
+      
+      voiceAgentRef.current?.start(welcomeMsg);
+      setIsVoiceActive(true);
+      
+      if (messages.length === 0) {
         setMessages([{ role: 'ai', text: welcomeMsg }]);
       }
     }

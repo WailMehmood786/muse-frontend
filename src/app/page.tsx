@@ -315,20 +315,12 @@ export default function Home() {
       voiceAgentRef.current?.stop();
       setIsVoiceActive(false);
     } else {
-      // Check if interview already started (has messages)
-      if (messages.length > 0) {
-        // Interview already in progress - just start listening, don't speak welcome
-        voiceAgentRef.current?.startListening();
-        setIsVoiceActive(true);
-      } else {
-        // Fresh start - speak welcome message
-        const client = clients.find(c => c.id === selectedClientId);
-        const clientName = isPublisher ? client?.name : user?.name;
-        const welcomeMsg = getWelcomeMessage(clientName || 'there');
-        voiceAgentRef.current?.start(welcomeMsg);
-        setIsVoiceActive(true);
-        setMessages([{ role: 'ai', text: welcomeMsg }]);
-      }
+      const client = clients.find(c => c.id === selectedClientId);
+      const clientName = isPublisher ? client?.name : user?.name;
+      const welcomeMsg = getWelcomeMessage(clientName || 'there');
+      voiceAgentRef.current?.start(welcomeMsg);
+      setIsVoiceActive(true);
+      setMessages([{ role: 'ai', text: welcomeMsg }]);
     }
   };
 
