@@ -238,12 +238,15 @@ export default function ClientInterviewPage({ params }: PageProps) {
       voiceAgentRef.current?.stop();
       setIsVoiceActive(false);
     } else {
-      const welcomeMsg = getWelcomeMessage(client?.name || 'there');
-      
-      voiceAgentRef.current?.start(welcomeMsg);
-      setIsVoiceActive(true);
-      
-      if (messages.length === 0) {
+      // If interview already started, just activate voice without welcome message
+      if (messages.length > 0) {
+        voiceAgentRef.current?.start(); // No welcome message, just start listening
+        setIsVoiceActive(true);
+      } else {
+        // First time - speak welcome message
+        const welcomeMsg = getWelcomeMessage(client?.name || 'there');
+        voiceAgentRef.current?.start(welcomeMsg);
+        setIsVoiceActive(true);
         setMessages([{ role: 'ai', text: welcomeMsg }]);
       }
     }

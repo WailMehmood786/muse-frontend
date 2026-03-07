@@ -314,10 +314,18 @@ export default function Home() {
     } else {
       const client = clients.find(c => c.id === selectedClientId);
       const clientName = isPublisher ? client?.name : user?.name;
-      const welcomeMsg = getWelcomeMessage(clientName || 'there');
-      voiceAgentRef.current?.start(welcomeMsg);
-      setIsVoiceActive(true);
-      setMessages([{ role: 'ai', text: welcomeMsg }]);
+      
+      // If interview already started, just activate voice without welcome message
+      if (messages.length > 0) {
+        voiceAgentRef.current?.start(); // No welcome message, just start listening
+        setIsVoiceActive(true);
+      } else {
+        // First time - speak welcome message
+        const welcomeMsg = getWelcomeMessage(clientName || 'there');
+        voiceAgentRef.current?.start(welcomeMsg);
+        setIsVoiceActive(true);
+        setMessages([{ role: 'ai', text: welcomeMsg }]);
+      }
     }
   };
 
