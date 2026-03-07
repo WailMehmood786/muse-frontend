@@ -210,8 +210,8 @@ export default function ClientInterview({
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-        <div className="max-w-4xl mx-auto space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
+        <div className="max-w-4xl mx-auto space-y-4 pb-4">
           {messages.length === 0 && (
             <div className="text-center py-12 animate-fadeIn">
               <div className="w-24 h-24 mx-auto mb-6 hdr-gradient-blue rounded-3xl flex items-center justify-center shadow-glow-blue animate-float">
@@ -256,18 +256,18 @@ export default function ClientInterview({
 
           {messages.map((msg, i) => (
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
-              <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 sm:p-5 transition-all duration-200 ${
+              <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-5 sm:p-6 transition-all duration-300 ${
                 msg.role === 'user'
-                  ? 'hdr-gradient-blue text-white shadow-glow-blue rounded-tr-sm'
-                  : 'glass-card rounded-tl-sm hover-lift'
+                  ? 'hdr-gradient-blue text-white shadow-glow-blue rounded-tr-sm hover-lift'
+                  : 'glass-card rounded-tl-sm hover-lift border-l-4 border-blue-500 dark:border-purple-500'
               }`}>
-                <div className={`prose prose-sm sm:prose max-w-none ${msg.role === 'user' ? 'prose-invert' : 'dark:prose-invert'}`}>
+                <div className={`prose prose-sm sm:prose max-w-none leading-relaxed ${msg.role === 'user' ? 'prose-invert' : 'dark:prose-invert'}`}>
                   <ReactMarkdown>{msg.text}</ReactMarkdown>
                 </div>
                 {msg.role === 'ai' && (
-                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
                     <button onClick={() => onSpeak(msg.text, i)}
-                      className="flex items-center gap-2 text-xs text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                      className="flex items-center gap-2 text-xs font-medium text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-all hover-lift px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20">
                       {speakingIndex === i ? (
                         <>
                           <Volume2 size={14} className="animate-pulse" />
@@ -300,49 +300,52 @@ export default function ClientInterview({
         </div>
       </div>
 
-      <div className="glass-ultra border-t border-gray-200 dark:border-gray-800 p-4 sm:p-6">
+      <div className="glass-ultra border-t border-gray-200 dark:border-gray-800 p-4 sm:p-6 shadow-ultra">
         <div className="max-w-4xl mx-auto">
           {isVoiceActive && (
-            <div className="mb-3 flex items-center justify-center gap-2 text-sm">
+            <div className="mb-4 flex items-center justify-center gap-2 text-sm">
               {isListening ? (
-                <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-xl animate-pulse shadow-lg">
-                  <div className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
-                  <span className="font-medium">Listening...</span>
+                <div className="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 text-red-600 dark:text-red-400 rounded-2xl animate-pulse shadow-lg border border-red-200 dark:border-red-800">
+                  <div className="relative">
+                    <div className="w-3 h-3 bg-red-500 rounded-full animate-ping absolute" />
+                    <div className="w-3 h-3 bg-red-500 rounded-full" />
+                  </div>
+                  <span className="font-semibold">Listening...</span>
                 </div>
               ) : isSpeaking ? (
-                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 rounded-xl shadow-lg">
-                  <Volume2 size={16} className="animate-pulse" />
-                  <span className="font-medium">Speaking...</span>
+                <div className="flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 text-blue-600 dark:text-blue-400 rounded-2xl shadow-lg border border-blue-200 dark:border-blue-800">
+                  <Volume2 size={18} className="animate-pulse" />
+                  <span className="font-semibold">Speaking...</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 px-4 py-2 glass-card text-gray-600 dark:text-gray-400 rounded-xl shadow-lg">
-                  <Sparkles size={16} />
-                  <span className="font-medium">Voice mode active</span>
+                <div className="flex items-center gap-3 px-5 py-3 glass-card text-gray-600 dark:text-gray-400 rounded-2xl shadow-lg">
+                  <Sparkles size={18} className="text-purple-500" />
+                  <span className="font-semibold">Voice mode active</span>
                 </div>
               )}
             </div>
           )}
 
-          <div className={`relative flex items-end gap-2 sm:gap-3 glass-card rounded-2xl p-3 sm:p-4 transition-all duration-200 ${
-            isListening ? 'shadow-glow-blue border-2 border-blue-500' : 'border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-800'
+          <div className={`relative flex items-end gap-3 glass-card rounded-2xl p-4 transition-all duration-300 shadow-lg ${
+            isListening ? 'shadow-glow-blue border-2 border-blue-500 scale-[1.02]' : 'border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-800 hover:shadow-xl'
           }`}>
             <button onClick={onToggleListening} disabled={!isVoiceActive}
-              className={`p-3 rounded-xl transition-all duration-200 ${
-                isListening ? 'bg-red-500 text-white shadow-lg animate-pulse neon-pink' :
-                isVoiceActive ? 'glass-card text-gray-600 dark:text-gray-400 hover-lift' :
+              className={`p-3.5 rounded-xl transition-all duration-300 ${
+                isListening ? 'bg-gradient-to-br from-red-500 to-pink-500 text-white shadow-lg animate-pulse neon-pink scale-110' :
+                isVoiceActive ? 'glass-card text-gray-600 dark:text-gray-400 hover-lift hover:bg-blue-50 dark:hover:bg-blue-900/20' :
                 'glass-card text-gray-400 cursor-not-allowed opacity-50'
               }`}>
-              {isListening ? <Mic size={20} /> : <MicOff size={20} />}
+              {isListening ? <Mic size={22} /> : <MicOff size={22} />}
             </button>
 
             <textarea ref={textareaRef} value={input} onChange={(e) => onInputChange(e.target.value)} onKeyDown={handleKeyDown}
               placeholder={isListening ? "🎤 Listening... tell me your story" : "Share your story here, or use voice..."}
-              className="flex-1 bg-transparent outline-none py-3 px-2 resize-none max-h-32 text-sm sm:text-base"
+              className="flex-1 bg-transparent outline-none py-3 px-3 resize-none max-h-32 text-sm sm:text-base placeholder:text-gray-400 dark:placeholder:text-gray-500"
               rows={1} disabled={isListening} />
 
             <button onClick={() => onSend(input)} disabled={!input.trim() || loading}
-              className="p-3 hdr-gradient-blue text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-glow-blue hover-lift transition-all duration-200 neon-blue">
-              {loading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+              className="p-3.5 hdr-gradient-blue text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-glow-blue hover-lift-ultra transition-all duration-300 neon-blue">
+              {loading ? <Loader2 size={22} className="animate-spin" /> : <Send size={22} />}
             </button>
           </div>
         </div>
