@@ -323,41 +323,26 @@ export default function ClientInterviewPage({ params }: PageProps) {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
-      {/* Simple Clean Header - No Back/Logout for Client */}
-      <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-4">
-        <div className="flex items-center justify-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-xl">
-            <span className="text-white font-bold text-lg">M</span>
-          </div>
-          <div className="text-center">
-            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">{client.bookTitle}</h1>
-            <p className="text-xs text-gray-600 dark:text-gray-400">Interview with {client.name}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Interview Component */}
-      <div className="flex-1 overflow-hidden">
-        <ClientInterview
-          clientName={client.name}
-          bookTitle={client.bookTitle}
-          messages={messages}
-          input={input}
-          loading={loading}
-          isListening={isListening}
-          isSpeaking={isSpeaking}
-          isVoiceActive={isVoiceActive}
-          wordCount={wordCount}
-          bookDraft={bookDraft}
-          onSend={handleSend}
-          onInputChange={setInput}
-          onToggleVoice={toggleVoiceAgent}
-          onToggleListening={toggleListening}
-          onSpeak={handleSpeak}
-          speakingIndex={speakingIndex}
-          isPublisher={false}
-        />
-      </div>
+      {/* Interview Component - No separate header, let ClientInterview handle it */}
+      <ClientInterview
+        clientName={client.name}
+        bookTitle={client.bookTitle}
+        messages={messages}
+        input={input}
+        loading={loading}
+        isListening={isListening}
+        isSpeaking={isSpeaking}
+        isVoiceActive={isVoiceActive}
+        wordCount={wordCount}
+        bookDraft={bookDraft}
+        onSend={handleSend}
+        onInputChange={setInput}
+        onToggleVoice={toggleVoiceAgent}
+        onToggleListening={toggleListening}
+        onSpeak={handleSpeak}
+        speakingIndex={speakingIndex}
+        isPublisher={false}
+      />
     </div>
   );
 }

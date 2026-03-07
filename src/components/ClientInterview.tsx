@@ -95,7 +95,7 @@ export default function ClientInterview({
                   <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">with {clientName}</p>
                 </div>
               </div>
-              <button onClick={() => setShowSidebar(false)} className="lg:hidden p-2 sm:p-2.5 hover:bg-white/50 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm flex-shrink-0 ml-2">
+              <button onClick={() => setShowSidebar(false)} className="p-2 sm:p-2.5 hover:bg-white/50 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm flex-shrink-0 ml-2">
                 <X size={18} className="sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" />
               </button>
             </div>
@@ -212,20 +212,21 @@ export default function ClientInterview({
         {/* Premium Top Bar */}
         <div className="h-14 sm:h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 bg-white/90 dark:bg-[#0f0f0f]/90 backdrop-blur-2xl shadow-sm">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-            {/* ALWAYS show menu button - for both publisher and client */}
+            {/* Menu button - ALWAYS visible */}
             <button onClick={() => setShowSidebar(true)} className="p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm flex-shrink-0">
               <Menu size={20} className="sm:w-[22px] sm:h-[22px] text-gray-700 dark:text-gray-300" />
             </button>
             <h1 className="text-sm sm:text-lg font-bold truncate" style={{ color: 'var(--foreground)' }}>{bookTitle}</h1>
           </div>
+          {/* Voice button - ALWAYS visible with proper mobile text */}
           <button onClick={onToggleVoice}
             className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg hover:scale-105 transform flex-shrink-0 ml-2 ${
               isVoiceActive 
                 ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white hover:shadow-2xl' 
                 : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`} style={!isVoiceActive ? { color: 'var(--foreground)' } : {}}>
-            <span className="hidden sm:inline">{isVoiceActive ? '🎤 Voice Active' : 'Start Voice Interview'}</span>
-            <span className="sm:hidden">{isVoiceActive ? '🎤' : '▶️'}</span>
+            <span className="hidden xs:inline sm:inline">{isVoiceActive ? '🎤 Voice' : 'Voice'}</span>
+            <span className="xs:hidden sm:hidden">🎤</span>
           </button>
         </div>
 
