@@ -66,15 +66,45 @@ export default function ClientInterviewPage({ params }: PageProps) {
   // Load client data from URL parameters or backend/localStorage
   useEffect(() => {
     const loadClient = async () => {
-      // First try to get from URL parameters
+      // First, ALWAYS try to load from localStorage
+      const savedClients = localStorage.getItem('muse_clients');
+      if (savedClients) {
+        const clients = JSON.parse(savedClients);
+        const existingClient = clients.find((c: any) => c.id === clientId);
+        if (existingClient) {
+          console.log('✅ Found existing client in localStorage with', existingClient.messages?.length || 0, 'messages');
+          setClient(existingClient);
+          if (existingClient.messages) setMessages(existingClient.messages);
+          if (existingClient.bookDraft) setBookDraft(existingClient.bookDraft);
+          if (existingClient.sessionId) setSessionId(existingClient.sessionId);
+          return; // Exit early - we found the client
+        }
+      }
+      
+      // Try backend next
+      try {
+        const res = await axios.get(`${BACKEND_URL}/api/clients/${clientId}`);
+        if (res.data.success) {
+          console.log('✅ Found client in backend with', res.data.client.messages?.length || 0, 'messages');
+          const clientData = res.data.client;
+          setClient(clientData);
+          if (clientData.messages) setMessages(clientData.messages);
+          if (clientData.bookDraft) setBookDraft(clientData.bookDraft);
+          if (clientData.sessionId) setSessionId(clientData.sessionId);
+          return; // Exit early - we found the client
+        }
+      } catch (error) {
+        console.log('⚠️ Backend unavailable, checking URL parameters');
+      }
+      
+      // Finally, try to get from URL parameters (for new clients)
       const urlParams = new URLSearchParams(window.location.search);
       const nameFromUrl = urlParams.get('name');
       const bookFromUrl = urlParams.get('book');
       const sportFromUrl = urlParams.get('sport');
       
       if (nameFromUrl && bookFromUrl) {
-        // Create client from URL parameters
-        console.log('Loading client from URL parameters');
+        console.log('📝 Creating new client from URL parameters');
         const clientData = {
           id: clientId,
           name: decodeURIComponent(nameFromUrl),
@@ -91,87 +121,25 @@ export default function ClientInterviewPage({ params }: PageProps) {
           bookDraft: '',
           wordCount: 0
         };
-        
-        // Try to load existing data from localStorage first
-        const savedClients = localStorage.getItem('muse_clients');
-        if (savedClients) {
-          const clients = JSON.parse(savedClients);
-          const existingClient = clients.find((c: any) => c.id === clientId);
-          if (existingClient) {
-            console.log('Found existing client data in localStorage');
-            setClient(existingClient);
-            if (existingClient.messages) setMessages(existingClient.messages);
-            if (existingClient.bookDraft) setBookDraft(existingClient.bookDraft);
-            if (existingClient.sessionId) setSessionId(existingClient.sessionId);
-            return;
-          }
-        }
-        
-        // Try backend
-        try {
-          const res = await axios.get(`${BACKEND_URL}/api/clients/${clientId}`);
-          if (res.data.success && res.data.client.messages) {
-            console.log('Found existing client data in backend');
-            const backendClient = res.data.client;
-            setClient(backendClient);
-            if (backendClient.messages) setMessages(backendClient.messages);
-            if (backendClient.bookDraft) setBookDraft(backendClient.bookDraft);
-            if (backendClient.sessionId) setSessionId(backendClient.sessionId);
-            return;
-          }
-        } catch (error) {
-          console.log('Backend unavailable, using new client data');
-        }
-        
-        // No existing data found, use new client
         setClient(clientData);
         return;
       }
       
-      // Try backend
-      try {
-        const res = await axios.get(`${BACKEND_URL}/api/clients/${clientId}`);
-        if (res.data.success) {
-          const clientData = res.data.client;
-          setClient(clientData);
-          if (clientData.messages) setMessages(clientData.messages);
-          if (clientData.bookDraft) setBookDraft(clientData.bookDraft);
-          if (clientData.sessionId) setSessionId(clientData.sessionId);
-          return;
-        }
-      } catch (error) {
-        console.log('Backend unavailable, trying localStorage');
-      }
-      
-      // Try localStorage as fallback
-      const savedClients = localStorage.getItem('muse_clients');
-      if (savedClients) {
-        const clients = JSON.parse(savedClients);
-        const found = clients.find((c: any) => c.id === clientId);
-        if (found) {
-          console.log('Loading client from localStorage');
-          setClient(found);
-          if (found.messages) setMessages(found.messages);
-          if (found.bookDraft) setBookDraft(found.bookDraft);
-          if (found.sessionId) setSessionId(found.sessionId);
-          return;
-        }
-      }
-      
-      // Client not found
+      // Client not found anywhere
+      console.log('❌ Client not found');
       setClient(null);
     };
     loadClient();
   }, [clientId]);
 
-  // Save messages to backend and localStorage
+  // Save messages to backend and localStorage - IMMEDIATE SAVE
   useEffect(() => {
     const saveToBackend = async () => {
       if (client && messages.length > 0) {
         const wordCount = bookDraft.split(/\s+/).filter((w: string) => w.length > 0).length;
         const progress = Math.min(Math.floor(wordCount / 50), 100);
         
-        // ALWAYS save to localStorage first (primary backup)
+        // ALWAYS save to localStorage IMMEDIATELY (primary backup)
         const savedClients = localStorage.getItem('muse_clients');
         let clients = savedClients ? JSON.parse(savedClients) : [];
         
@@ -195,9 +163,9 @@ export default function ClientInterviewPage({ params }: PageProps) {
         }
         
         localStorage.setItem('muse_clients', JSON.stringify(clients));
-        console.log('✅ Saved to localStorage:', messages.length, 'messages');
+        console.log('✅ SAVED to localStorage:', messages.length, 'messages,', wordCount, 'words');
         
-        // Try to sync with backend
+        // Try to sync with backend (secondary)
         try {
           await axios.put(`${BACKEND_URL}/api/clients/${client.id}`, {
             messages,
@@ -214,9 +182,10 @@ export default function ClientInterviewPage({ params }: PageProps) {
       }
     };
     
-    // Debounce save
-    const timer = setTimeout(saveToBackend, 1000);
-    return () => clearTimeout(timer);
+    // Save immediately when messages change
+    if (messages.length > 0) {
+      saveToBackend();
+    }
   }, [messages, bookDraft, sessionId, client]);
 
   // Handle Send Message
