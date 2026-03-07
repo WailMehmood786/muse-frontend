@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Mic, MicOff, Send, Volume2, Loader2, Sparkles, Download, FileText, FileDown } from 'lucide-react';
+import { Mic, MicOff, Send, Volume2, Loader2, Sparkles, Download, FileText, FileDown, Zap, Brain } from 'lucide-react';
 import { exportToPDF, exportToMarkdown, exportToText, exportToDOCX } from '@/utils/pdfExport';
+import InterviewHelper from './InterviewHelper';
+import InterviewProgress from './InterviewProgress';
 
 type Message = { role: 'user' | 'ai'; text: string };
 
@@ -102,26 +104,41 @@ export default function ClientInterview({
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
-      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 p-4 sm:p-6 glass-ultra">
-        <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
+      {/* Interview Helper - Smart Tips */}
+      <InterviewHelper 
+        messageCount={messages.length} 
+        wordCount={wordCount}
+        lastUserMessage={messages.length > 0 ? messages[messages.length - 1]?.text : ''}
+      />
+
+      {/* Ultra Professional Header */}
+      <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-gradient-animate">{bookTitle}</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">with {clientName}</p>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl hdr-gradient-blue flex items-center justify-center shadow-glow-blue animate-glow-pulse">
+                <Brain size={20} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold text-gradient-animate">{bookTitle}</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">with {clientName}</p>
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {isPublisher && wordCount > 0 && (
               <div className="relative" ref={exportMenuRef}>
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover-lift bg-green-500 hover:bg-green-600 text-white"
+                  className="flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover-lift hdr-gradient-forest text-white neon-green"
                 >
                   <Download size={18} />
                   <span className="hidden sm:inline">Export</span>
                 </button>
 
                 {showExportMenu && (
-                  <div className="absolute top-full right-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50 animate-fadeIn">
+                  <div className="absolute top-full right-0 mt-2 w-64 glass-card rounded-xl shadow-ultra overflow-hidden z-50 animate-fadeIn">
                     <button
                       onClick={() => handleExport('docx')}
                       className="w-full px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-gray-700 transition-all flex items-center gap-3 border-b border-gray-100 dark:border-gray-700"
@@ -168,7 +185,7 @@ export default function ClientInterview({
             )}
             <button onClick={onToggleVoice}
               className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover-lift ${
-                isVoiceActive ? 'hdr-gradient-blue text-white neon-blue' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                isVoiceActive ? 'hdr-gradient-blue text-white neon-blue animate-glow-pulse' : 'glass-card hover-glow'
               }`}>
               {isVoiceActive ? (
                 <>
@@ -177,37 +194,62 @@ export default function ClientInterview({
                 </>
               ) : (
                 <>
-                  <Sparkles size={18} />
+                  <Zap size={18} />
                   <span className="hidden sm:inline">Start Voice</span>
                 </>
               )}
             </button>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 rounded-lg">
-            <span className="font-medium">{messages.length} messages</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 rounded-lg">
-            <span className="font-medium">{wordCount.toLocaleString()} words</span>
-          </div>
-        </div>
+
+        {/* Interview Progress */}
+        <InterviewProgress 
+          messageCount={messages.length} 
+          wordCount={wordCount}
+          targetWords={2000}
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-6">
         <div className="max-w-4xl mx-auto space-y-4">
           {messages.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 mx-auto mb-6 hdr-gradient-blue rounded-2xl flex items-center justify-center shadow-xl neon-blue">
-                <Sparkles size={32} className="text-white" />
+            <div className="text-center py-12 animate-fadeIn">
+              <div className="w-24 h-24 mx-auto mb-6 hdr-gradient-blue rounded-3xl flex items-center justify-center shadow-glow-blue animate-float">
+                <Sparkles size={40} className="text-white" />
               </div>
-              <h2 className="text-2xl font-bold mb-3">Let's Tell Your Story</h2>
-              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
-                I'm here to interview you for your autobiography. Just like a real conversation - I'll ask questions, you share your story. Let's begin.
+              <h2 className="text-3xl font-bold mb-3 text-gradient-animate">Let's Tell Your Story</h2>
+              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-8 text-lg">
+                I'm here to interview you for your autobiography. Just like a real conversation - I'll ask questions, you share your story.
               </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto mb-8">
+                <div className="glass-card p-4 rounded-xl hover-lift">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                    <Brain size={24} className="text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h3 className="font-bold mb-1">Smart Questions</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">AI asks deep, emotional questions</p>
+                </div>
+                <div className="glass-card p-4 rounded-xl hover-lift">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
+                    <Zap size={24} className="text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h3 className="font-bold mb-1">Voice or Text</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Speak naturally or type freely</p>
+                </div>
+                <div className="glass-card p-4 rounded-xl hover-lift">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                    <FileText size={24} className="text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="font-bold mb-1">Auto Book</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Your story becomes a book</p>
+                </div>
+              </div>
               <button onClick={onToggleVoice}
-                className="px-6 py-3 hdr-gradient-blue text-white rounded-xl hover:shadow-lg hover-lift-ultra neon-blue">
-                Start Interview
+                className="px-8 py-4 hdr-gradient-blue text-white rounded-xl hover:shadow-glow-blue hover-lift-ultra neon-blue text-lg font-medium">
+                <div className="flex items-center gap-3">
+                  <Sparkles size={20} />
+                  <span>Start Interview</span>
+                </div>
               </button>
             </div>
           )}
@@ -216,8 +258,8 @@ export default function ClientInterview({
             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
               <div className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 sm:p-5 transition-all duration-200 ${
                 msg.role === 'user'
-                  ? 'hdr-gradient-blue text-white shadow-lg neon-blue rounded-tr-sm'
-                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg rounded-tl-sm'
+                  ? 'hdr-gradient-blue text-white shadow-glow-blue rounded-tr-sm'
+                  : 'glass-card rounded-tl-sm hover-lift'
               }`}>
                 <div className={`prose prose-sm sm:prose max-w-none ${msg.role === 'user' ? 'prose-invert' : 'dark:prose-invert'}`}>
                   <ReactMarkdown>{msg.text}</ReactMarkdown>
@@ -225,7 +267,7 @@ export default function ClientInterview({
                 {msg.role === 'ai' && (
                   <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                     <button onClick={() => onSpeak(msg.text, i)}
-                      className="flex items-center gap-2 text-xs text-gray-500 hover:text-blue-600 dark:hover:text-blue-400">
+                      className="flex items-center gap-2 text-xs text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                       {speakingIndex === i ? (
                         <>
                           <Volume2 size={14} className="animate-pulse" />
@@ -246,34 +288,34 @@ export default function ClientInterview({
 
           {loading && (
             <div className="flex items-center gap-3 text-gray-400 ml-4 animate-fadeIn">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="flex gap-1.5">
+                <div className="w-2.5 h-2.5 bg-blue-500 rounded-full typing-dot" />
+                <div className="w-2.5 h-2.5 bg-purple-500 rounded-full typing-dot" />
+                <div className="w-2.5 h-2.5 bg-pink-500 rounded-full typing-dot" />
               </div>
-              <span className="text-sm">Thinking...</span>
+              <span className="text-sm font-medium">AI is thinking...</span>
             </div>
           )}
           <div ref={scrollRef} />
         </div>
       </div>
 
-      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800 p-4 sm:p-6 glass-ultra">
+      <div className="glass-ultra border-t border-gray-200 dark:border-gray-800 p-4 sm:p-6">
         <div className="max-w-4xl mx-auto">
           {isVoiceActive && (
             <div className="mb-3 flex items-center justify-center gap-2 text-sm">
               {isListening ? (
-                <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-lg animate-pulse">
+                <div className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-xl animate-pulse shadow-lg">
                   <div className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
                   <span className="font-medium">Listening...</span>
                 </div>
               ) : isSpeaking ? (
-                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 rounded-lg">
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/10 text-blue-600 dark:text-blue-400 rounded-xl shadow-lg">
                   <Volume2 size={16} className="animate-pulse" />
                   <span className="font-medium">Speaking...</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-lg">
+                <div className="flex items-center gap-2 px-4 py-2 glass-card text-gray-600 dark:text-gray-400 rounded-xl shadow-lg">
                   <Sparkles size={16} />
                   <span className="font-medium">Voice mode active</span>
                 </div>
@@ -281,25 +323,25 @@ export default function ClientInterview({
             </div>
           )}
 
-          <div className={`relative flex items-end gap-2 sm:gap-3 bg-white dark:bg-gray-800 border-2 rounded-2xl p-2 sm:p-3 transition-all duration-200 ${
-            isListening ? 'border-red-500 shadow-lg' : 'border-gray-200 dark:border-gray-700 focus-within:border-blue-500'
+          <div className={`relative flex items-end gap-2 sm:gap-3 glass-card rounded-2xl p-3 sm:p-4 transition-all duration-200 ${
+            isListening ? 'shadow-glow-blue border-2 border-blue-500' : 'border-2 border-transparent hover:border-blue-200 dark:hover:border-blue-800'
           }`}>
             <button onClick={onToggleListening} disabled={!isVoiceActive}
               className={`p-3 rounded-xl transition-all duration-200 ${
-                isListening ? 'bg-red-500 text-white shadow-lg animate-pulse' :
-                isVoiceActive ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600' :
-                'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed opacity-50'
+                isListening ? 'bg-red-500 text-white shadow-lg animate-pulse neon-pink' :
+                isVoiceActive ? 'glass-card text-gray-600 dark:text-gray-400 hover-lift' :
+                'glass-card text-gray-400 cursor-not-allowed opacity-50'
               }`}>
               {isListening ? <Mic size={20} /> : <MicOff size={20} />}
             </button>
 
             <textarea ref={textareaRef} value={input} onChange={(e) => onInputChange(e.target.value)} onKeyDown={handleKeyDown}
-              placeholder={isListening ? "Listening... tell me your story" : "Share your story here, or use voice..."}
+              placeholder={isListening ? "🎤 Listening... tell me your story" : "Share your story here, or use voice..."}
               className="flex-1 bg-transparent outline-none py-3 px-2 resize-none max-h-32 text-sm sm:text-base"
               rows={1} disabled={isListening} />
 
             <button onClick={() => onSend(input)} disabled={!input.trim() || loading}
-              className="p-3 hdr-gradient-blue text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover-lift transition-all duration-200 neon-blue">
+              className="p-3 hdr-gradient-blue text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-glow-blue hover-lift transition-all duration-200 neon-blue">
               {loading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
             </button>
           </div>
