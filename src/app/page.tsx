@@ -116,23 +116,40 @@ export default function Home() {
 
   const loadClientsFromBackend = async () => {
     try {
-      // Get token
       const token = localStorage.getItem('muse_publisher_token');
       
-      // Always load from backend first (primary source of truth)
+      if (!token) {
+        console.log('No token found, loading from localStorage');
+        const savedClients = localStorage.getItem('muse_clients');
+        if (savedClients) {
+          setClients(JSON.parse(savedClients));
+        }
+        return;
+      }
+
+      console.log('Loading clients from backend with token');
+      
       const res = await axios.get(`${BACKEND_URL}/api/clients?publisherId=publisher_1`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
       if (res.data.success) {
-        setClients(res.data.clients);
-        // Sync to localStorage as backup
-        localStorage.setItem('muse_clients', JSON.stringify(res.data.clients));
         console.log(`✅ Loaded ${res.data.clients.length} clients from backend`);
+        setClients(res.data.clients);
+        localStorage.setItem('muse_clients', JSON.stringify(res.data.clients));
       }
-    } catch (error) {
-      console.error('Backend unavailable, loading from localStorage:', error);
-      // Fallback to localStorage only if backend fails
+    } catch (error: any) {
+      console.error('Backend unavailable:', error?.response?.data || error.message);
+      
+      if (error?.response?.status === 401) {
+        console.log('Token expired, clearing auth');
+        localStorage.removeItem('muse_publisher_token');
+      }
+      
+      // Fallback to localStorage
       const savedClients = localStorage.getItem('muse_clients');
       if (savedClients) {
         setClients(JSON.parse(savedClients));
@@ -326,29 +343,37 @@ export default function Home() {
     // Get token from localStorage
     const token = localStorage.getItem('muse_publisher_token');
     if (!token) {
-      alert('❌ Please login again');
+      alert('❌ Session expired. Please login again.');
+      handleLogout();
       return;
     }
 
-    // Always use backend as primary storage
+    console.log('Creating client with token:', token.substring(0, 20) + '...');
+
     try {
-      const res = await axios.post(`${BACKEND_URL}/api/clients`, {
-        name: newClientName,
-        email: newClientEmail,
-        bookTitle: newClientBook,
-        sport: newClientSport,
-        publisherId: user?.id || 'publisher_1'
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      const res = await axios.post(
+        `${BACKEND_URL}/api/clients`,
+        {
+          name: newClientName,
+          email: newClientEmail,
+          bookTitle: newClientBook,
+          sport: newClientSport,
+          publisherId: 'publisher_1'
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
         }
-      });
+      );
+      
+      console.log('Client created successfully:', res.data);
       
       if (res.data?.success && res.data?.client) {
         const serverClient: Client = res.data.client;
         const updated = [...clients, serverClient];
         setClients(updated);
-        // Backup to localStorage
         localStorage.setItem('muse_clients', JSON.stringify(updated));
         
         setNewClientName('');
@@ -362,8 +387,15 @@ export default function Home() {
       }
     } catch (error: any) {
       console.error('Failed to create client:', error);
-      const errorMsg = error?.response?.data?.error || 'Failed to create client';
-      alert(`❌ ${errorMsg}\n\nPlease check your connection and try again.`);
+      console.error('Error response:', error?.response?.data);
+      
+      if (error?.response?.status === 401) {
+        alert('❌ Session expired. Please login again.');
+        handleLogout();
+      } else {
+        const errorMsg = error?.response?.data?.error || 'Failed to create client';
+        alert(`❌ ${errorMsg}\n\nPlease try again.`);
+      }
     }
   };
 
