@@ -81,32 +81,32 @@ export default function ClientInterview({
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-[#0a0a0a] dark:to-[#1a1a2e]">
       {/* Premium Sidebar */}
-      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white/95 dark:bg-[#0f0f0f]/95 backdrop-blur-xl border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-300 ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-80 bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-2xl border-r border-gray-200 dark:border-gray-800 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-900 dark:to-purple-900/20">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                  <BookOpen size={20} className="text-white" />
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-xl animate-pulse">
+                  <BookOpen size={22} className="text-white" />
                 </div>
                 <div>
-                  <h2 className="font-bold text-gray-900 dark:text-white text-sm">{bookTitle}</h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">with {clientName}</p>
+                  <h2 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>{bookTitle}</h2>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">with {clientName}</p>
                 </div>
               </div>
-              <button onClick={() => setShowSidebar(false)} className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                <X size={18} className="text-gray-600 dark:text-gray-400" />
+              <button onClick={() => setShowSidebar(false)} className="lg:hidden p-2.5 hover:bg-white/50 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm">
+                <X size={20} className="text-gray-700 dark:text-gray-300" />
               </button>
             </div>
           </div>
 
           {/* Stats Section */}
-          <div className="p-6 space-y-4 flex-1 overflow-y-auto">
+          <div className="p-6 space-y-5 flex-1 overflow-y-auto custom-scrollbar">
             {/* Interview Stats */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-4 border border-blue-200 dark:border-blue-800">
-              <h3 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                <Sparkles size={14} className="text-blue-600" />
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-5 border border-blue-200 dark:border-blue-800 shadow-lg hover:shadow-xl transition-all">
+              <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
+                <Sparkles size={16} className="text-blue-600 dark:text-blue-400" />
                 Interview Progress
               </h3>
               <div className="space-y-3">
@@ -126,29 +126,31 @@ export default function ClientInterview({
             </div>
 
             {/* Progress Bar */}
-            <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl p-4 border border-gray-200 dark:border-gray-800 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>Book Progress</span>
-                <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
+            <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl p-5 border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-xl transition-all">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Book Progress</span>
+                <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
               </div>
-              <div className="h-2.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+              <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner">
                 <div 
-                  className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-500 shadow-lg" 
-                  style={{ width: `${progress}%` }} 
-                />
+                  className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-500 shadow-lg relative" 
+                  style={{ width: `${progress}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
+                </div>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
+              <p className="text-xs text-gray-700 dark:text-gray-300 mt-3 font-medium">
                 {wordCount < 2000 ? `${(2000 - wordCount).toLocaleString()} words remaining` : '🎉 Target achieved! Keep going!'}
               </p>
             </div>
 
             {/* Tips Card */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-800">
-              <h3 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <Zap size={14} className="text-amber-600" />
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-5 border border-amber-200 dark:border-amber-800 shadow-lg hover:shadow-xl transition-all">
+              <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                <Zap size={16} className="text-amber-600 dark:text-amber-400" />
                 Quick Tip
               </h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
                 {messages.length === 0 
                   ? "Click 'Start Voice' to begin your interview with AI"
                   : messages.length < 5
@@ -163,8 +165,8 @@ export default function ClientInterview({
             {isPublisher && wordCount > 0 && (
               <div className="relative">
                 <button onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                  <Download size={16} />
+                  className="w-full px-5 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl text-sm font-bold transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 hover:scale-105 transform">
+                  <Download size={18} />
                   Export Your Book
                 </button>
                 {showExportMenu && (
@@ -208,19 +210,19 @@ export default function ClientInterview({
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Premium Top Bar */}
-        <div className="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-white/80 dark:bg-[#0f0f0f]/80 backdrop-blur-xl">
+        <div className="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-white/90 dark:bg-[#0f0f0f]/90 backdrop-blur-2xl shadow-sm">
           <div className="flex items-center gap-3">
-            <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-              <Menu size={20} className="text-gray-600 dark:text-gray-400" />
+            <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm">
+              <Menu size={22} className="text-gray-700 dark:text-gray-300" />
             </button>
-            <h1 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>{bookTitle}</h1>
+            <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{bookTitle}</h1>
           </div>
           <button onClick={onToggleVoice}
-            className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg ${
+            className={`px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:scale-105 transform ${
               isVoiceActive 
-                ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-xl' 
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}>
+                ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white hover:shadow-2xl' 
+                : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+            }`} style={!isVoiceActive ? { color: 'var(--foreground)' } : {}}>
             {isVoiceActive ? '🎤 Voice Active' : 'Start Voice Interview'}
           </button>
         </div>

@@ -543,27 +543,27 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
-      <div className="h-14 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sm:px-6 z-10 glass-ultra">
+      <div className="h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sm:px-6 z-10 shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 hdr-gradient-blue rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-ultra neon-blue">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-xl">
             M
           </div>
           <div>
-            <span className="font-bold text-lg text-gradient-animate">Muse</span>
-            <span className="ml-2 px-2 py-0.5 bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs rounded-full font-medium">Publisher</span>
+            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Muse</span>
+            <span className="ml-2 px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full font-semibold">Publisher</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {selectedClientId && (
-            <button onClick={() => setSelectedClientId(null)} className="px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all hover-lift">
+            <button onClick={() => setSelectedClientId(null)} className="px-4 py-2.5 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
               ← Dashboard
             </button>
           )}
-          <button onClick={toggleTheme} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all hover-lift">
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+          <button onClick={toggleTheme} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
+            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
           </button>
-          <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all hover-lift text-sm">
-            <LogOut size={16} />
+          <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+            <LogOut size={18} />
             <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
