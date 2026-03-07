@@ -71,8 +71,7 @@ export default function Home() {
       onFinalTranscript: (text) => handleSend(text),
       onError: (error) => console.error('Voice error:', error)
     });
-    // Removed setStopRecognitionOnSpeak - not needed anymore
-    voiceAgentRef.current.setSilenceMs(1200);
+    voiceAgentRef.current.setSilenceMs(2000); // 2 seconds for better accuracy
     voiceAgentRef.current.setLanguage('en-US');
     voiceAgentRef.current.setVoice({ rate: 0.9, pitch: 1.02, volume: 1.0 });
     return () => voiceAgentRef.current?.stop();

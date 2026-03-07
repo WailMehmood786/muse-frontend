@@ -12,7 +12,7 @@ export class VoiceAgent {
   private currentUtterance: SpeechSynthesisUtterance | null = null;
   
   // Settings
-  private silenceTimeout: number = 1500; // 1.5 seconds
+  private silenceTimeout: number = 2000; // 2 seconds - more time to finish speaking
   private voiceRate: number = 0.9;
   private voicePitch: number = 1.0;
   private voiceVolume: number = 1.0;
@@ -78,6 +78,7 @@ export class VoiceAgent {
     };
 
     let finalTranscript = '';
+    let lastProcessedTranscript = ''; // Track what we already processed
 
     this.recognition.onresult = (event: any) => {
       if (this.silenceTimer) {
@@ -100,11 +101,15 @@ export class VoiceAgent {
       const currentText = (finalTranscript + ' ' + interimTranscript).trim();
       this.onTranscript(currentText);
 
-      // Set silence timer for final transcript
+      // Set silence timer for final transcript - only if we have new content
       this.silenceTimer = setTimeout(() => {
-        if (finalTranscript.trim() && !this.isProcessing) {
+        const trimmedTranscript = finalTranscript.trim();
+        
+        // Only process if we have text AND it's different from last processed
+        if (trimmedTranscript && trimmedTranscript !== lastProcessedTranscript && !this.isProcessing) {
           this.isProcessing = true;
-          this.onFinalTranscript(finalTranscript.trim());
+          lastProcessedTranscript = trimmedTranscript; // Mark as processed
+          this.onFinalTranscript(trimmedTranscript);
           finalTranscript = '';
           
           // Stop listening after final transcript
@@ -112,9 +117,10 @@ export class VoiceAgent {
             this.stopListening();
           }
           
+          // Reset processing flag after a delay
           setTimeout(() => {
             this.isProcessing = false;
-          }, 500);
+          }, 1000);
         }
       }, this.silenceTimeout);
     };
