@@ -91,6 +91,39 @@ export default function ClientInterviewPage({ params }: PageProps) {
           bookDraft: '',
           wordCount: 0
         };
+        
+        // Try to load existing data from localStorage first
+        const savedClients = localStorage.getItem('muse_clients');
+        if (savedClients) {
+          const clients = JSON.parse(savedClients);
+          const existingClient = clients.find((c: any) => c.id === clientId);
+          if (existingClient) {
+            console.log('Found existing client data in localStorage');
+            setClient(existingClient);
+            if (existingClient.messages) setMessages(existingClient.messages);
+            if (existingClient.bookDraft) setBookDraft(existingClient.bookDraft);
+            if (existingClient.sessionId) setSessionId(existingClient.sessionId);
+            return;
+          }
+        }
+        
+        // Try backend
+        try {
+          const res = await axios.get(`${BACKEND_URL}/api/clients/${clientId}`);
+          if (res.data.success && res.data.client.messages) {
+            console.log('Found existing client data in backend');
+            const backendClient = res.data.client;
+            setClient(backendClient);
+            if (backendClient.messages) setMessages(backendClient.messages);
+            if (backendClient.bookDraft) setBookDraft(backendClient.bookDraft);
+            if (backendClient.sessionId) setSessionId(backendClient.sessionId);
+            return;
+          }
+        } catch (error) {
+          console.log('Backend unavailable, using new client data');
+        }
+        
+        // No existing data found, use new client
         setClient(clientData);
         return;
       }

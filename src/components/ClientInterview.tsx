@@ -112,28 +112,28 @@ export default function ClientInterview({
         lastUserMessage={messages.length > 0 ? messages[messages.length - 1]?.text : ''}
       />
 
-      {/* Ultra Professional Header */}
-      <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 p-3 sm:p-4">
-        <div className="flex items-center justify-between mb-3">
+      {/* Ultra Compact Header */}
+      <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 p-2 sm:p-3">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg hdr-gradient-blue flex items-center justify-center shadow-glow-blue">
-                <Brain size={16} className="text-white" />
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg hdr-gradient-blue flex items-center justify-center shadow-glow-blue">
+                <Brain size={14} className="text-white" />
               </div>
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-gradient-animate">{bookTitle}</h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">with {clientName}</p>
+                <h1 className="text-sm sm:text-base font-bold text-gradient-animate">{bookTitle}</h1>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">with {clientName}</p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             {isPublisher && wordCount > 0 && (
               <div className="relative" ref={exportMenuRef}>
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover-lift hdr-gradient-forest text-white neon-green text-sm"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-medium transition-all duration-200 shadow-lg hover-lift hdr-gradient-forest text-white neon-green text-xs"
                 >
-                  <Download size={16} />
+                  <Download size={14} />
                   <span className="hidden sm:inline">Export</span>
                 </button>
 
@@ -184,18 +184,18 @@ export default function ClientInterview({
               </div>
             )}
             <button onClick={onToggleVoice}
-              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover-lift text-sm ${
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-medium transition-all duration-200 shadow-lg hover-lift text-xs ${
                 isVoiceActive ? 'hdr-gradient-blue text-white neon-blue animate-glow-pulse' : 'glass-card hover-glow'
               }`}>
               {isVoiceActive ? (
                 <>
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                  <span className="hidden sm:inline">Voice Active</span>
+                  <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                  <span className="hidden sm:inline">Voice</span>
                 </>
               ) : (
                 <>
-                  <Zap size={16} />
-                  <span className="hidden sm:inline">Start Voice</span>
+                  <Zap size={14} />
+                  <span className="hidden sm:inline">Voice</span>
                 </>
               )}
             </button>

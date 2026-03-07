@@ -17,59 +17,54 @@ export default function InterviewProgress({
   const questionsAnswered = Math.floor(messageCount / 2);
 
   return (
-    <div className="space-y-3">
-      {/* Compact Stats Row */}
-      <div className="grid grid-cols-4 gap-2">
+    <div className="space-y-2">
+      {/* Ultra Compact Stats Row */}
+      <div className="flex items-center justify-between gap-2">
         {/* Messages */}
-        <div className="glass-card rounded-lg p-2 hover-lift text-center">
-          <div className="flex items-center justify-center gap-1 mb-1">
-            <MessageSquare size={14} className="text-blue-600 dark:text-blue-400" />
-            <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Messages</span>
+        <div className="flex items-center gap-1.5 glass-card rounded-lg px-2 py-1 hover-lift">
+          <MessageSquare size={12} className="text-blue-600 dark:text-blue-400" />
+          <div>
+            <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{messageCount}</p>
+            <p className="text-[9px] text-gray-500 dark:text-gray-400">msgs</p>
           </div>
-          <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{messageCount}</p>
         </div>
 
         {/* Words */}
-        <div className="glass-card rounded-lg p-2 hover-lift text-center">
-          <div className="flex items-center justify-center gap-1 mb-1">
-            <FileText size={14} className="text-purple-600 dark:text-purple-400" />
-            <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Words</span>
+        <div className="flex items-center gap-1.5 glass-card rounded-lg px-2 py-1 hover-lift">
+          <FileText size={12} className="text-purple-600 dark:text-purple-400" />
+          <div>
+            <p className="text-xs font-bold text-purple-600 dark:text-purple-400">{wordCount}</p>
+            <p className="text-[9px] text-gray-500 dark:text-gray-400">words</p>
           </div>
-          <p className="text-lg font-bold text-purple-600 dark:text-purple-400">{wordCount}</p>
         </div>
 
         {/* Questions */}
-        <div className="glass-card rounded-lg p-2 hover-lift text-center">
-          <div className="flex items-center justify-center gap-1 mb-1">
-            <Target size={14} className="text-green-600 dark:text-green-400" />
-            <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Questions</span>
+        <div className="flex items-center gap-1.5 glass-card rounded-lg px-2 py-1 hover-lift">
+          <Target size={12} className="text-green-600 dark:text-green-400" />
+          <div>
+            <p className="text-xs font-bold text-green-600 dark:text-green-400">{questionsAnswered}</p>
+            <p className="text-[9px] text-gray-500 dark:text-gray-400">ques</p>
           </div>
-          <p className="text-lg font-bold text-green-600 dark:text-green-400">{questionsAnswered}</p>
         </div>
 
         {/* Progress */}
-        <div className="glass-card rounded-lg p-2 hover-lift text-center">
-          <div className="flex items-center justify-center gap-1 mb-1">
-            <TrendingUp size={14} className="text-orange-600 dark:text-orange-400" />
-            <span className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Progress</span>
+        <div className="flex items-center gap-1.5 glass-card rounded-lg px-2 py-1 hover-lift">
+          <TrendingUp size={12} className="text-orange-600 dark:text-orange-400" />
+          <div>
+            <p className="text-xs font-bold text-orange-600 dark:text-orange-400">{Math.round(progress)}%</p>
+            <p className="text-[9px] text-gray-500 dark:text-gray-400">done</p>
           </div>
-          <p className="text-lg font-bold text-orange-600 dark:text-orange-400">{Math.round(progress)}%</p>
         </div>
       </div>
 
-      {/* Compact Progress Bar */}
+      {/* Ultra Thin Progress Bar */}
       <div>
-        <div className="h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-1 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
           <div 
             className="h-full hdr-gradient-blue transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-1 text-center">
-          {wordCount < targetWords 
-            ? `${(targetWords - wordCount).toLocaleString()} words to go` 
-            : '🎉 Target reached!'}
-        </p>
       </div>
     </div>
   );
