@@ -23,6 +23,8 @@ interface Client {
   bookDraft: string;
   wordCount: number;
   sport?: string;
+  publisherId?: string;
+  createdAt?: string;
 }
 
 type Message = { role: 'user' | 'ai'; text: string };
@@ -342,61 +344,98 @@ export default function Home() {
 
     // Get token from localStorage
     const token = localStorage.getItem('muse_publisher_token');
-    if (!token) {
-      alert('❌ Session expired. Please login again.');
-      handleLogout();
-      return;
-    }
-
-    console.log('Creating client with token:', token.substring(0, 20) + '...');
-
-    try {
-      const res = await axios.post(
-        `${BACKEND_URL}/api/clients`,
-        {
-          name: newClientName,
-          email: newClientEmail,
-          bookTitle: newClientBook,
-          sport: newClientSport,
-          publisherId: 'publisher_1'
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
+    
+    // Try backend first
+    if (token) {
+      console.log('Attempting to create client via backend...');
+      
+      try {
+        const res = await axios.post(
+          `${BACKEND_URL}/api/clients`,
+          {
+            name: newClientName,
+            email: newClientEmail,
+            bookTitle: newClientBook,
+            sport: newClientSport,
+            publisherId: 'publisher_1'
+          },
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            timeout: 10000 // 10 second timeout
           }
+        );
+        
+        console.log('✅ Backend response:', res.data);
+        
+        if (res.data?.success && res.data?.client) {
+          const serverClient: Client = res.data.client;
+          const updated = [...clients, serverClient];
+          setClients(updated);
+          localStorage.setItem('muse_clients', JSON.stringify(updated));
+          
+          setNewClientName('');
+          setNewClientEmail('');
+          setNewClientBook('');
+          setNewClientSport('baseball');
+          setShowAddClient(false);
+          
+          navigator.clipboard.writeText(serverClient.uniqueLink);
+          alert(`✅ Client ${serverClient.name} added!\n\n📋 Link copied to clipboard.`);
+          return;
         }
-      );
-      
-      console.log('Client created successfully:', res.data);
-      
-      if (res.data?.success && res.data?.client) {
-        const serverClient: Client = res.data.client;
-        const updated = [...clients, serverClient];
-        setClients(updated);
-        localStorage.setItem('muse_clients', JSON.stringify(updated));
+      } catch (error: any) {
+        console.error('❌ Backend error:', error?.response?.data || error.message);
         
-        setNewClientName('');
-        setNewClientEmail('');
-        setNewClientBook('');
-        setNewClientSport('baseball');
-        setShowAddClient(false);
+        if (error?.response?.status === 401) {
+          alert('❌ Session expired. Please login again.');
+          handleLogout();
+          return;
+        }
         
-        navigator.clipboard.writeText(serverClient.uniqueLink);
-        alert(`✅ Client ${serverClient.name} added!\n\n📋 Link copied to clipboard.\n\n🔗 Share this link with your client.`);
-      }
-    } catch (error: any) {
-      console.error('Failed to create client:', error);
-      console.error('Error response:', error?.response?.data);
-      
-      if (error?.response?.status === 401) {
-        alert('❌ Session expired. Please login again.');
-        handleLogout();
-      } else {
-        const errorMsg = error?.response?.data?.error || 'Failed to create client';
-        alert(`❌ ${errorMsg}\n\nPlease try again.`);
+        // Continue to fallback
+        console.log('Falling back to localStorage...');
       }
     }
+    
+    // Fallback: Create client locally
+    console.log('Creating client locally (localStorage)');
+    const clientId = `client_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || window.location.origin;
+    const uniqueLink = `${frontendUrl}/interview/${clientId}?name=${encodeURIComponent(newClientName)}&book=${encodeURIComponent(newClientBook)}&sport=${newClientSport}`;
+    
+    const localClient: Client = {
+      id: clientId,
+      name: newClientName,
+      email: newClientEmail,
+      bookTitle: newClientBook,
+      sport: newClientSport,
+      uniqueLink,
+      sessionId: null,
+      lastActive: new Date().toISOString(),
+      status: 'pending',
+      progress: 0,
+      messages: [],
+      bookDraft: '',
+      wordCount: 0,
+      publisherId: 'publisher_1',
+      createdAt: new Date().toISOString()
+    };
+    
+    const updated = [...clients, localClient];
+    setClients(updated);
+    localStorage.setItem('muse_clients', JSON.stringify(updated));
+    
+    setNewClientName('');
+    setNewClientEmail('');
+    setNewClientBook('');
+    setNewClientSport('baseball');
+    setShowAddClient(false);
+    
+    navigator.clipboard.writeText(uniqueLink);
+    alert(`✅ Client ${newClientName} added!\n\n📋 Link copied to clipboard.\n\n💡 Note: Using local storage (backend unavailable)`);
   };
 
   const handleSelectClient = (clientId: string) => setSelectedClientId(clientId);
