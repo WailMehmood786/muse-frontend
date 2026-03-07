@@ -79,23 +79,23 @@ export default function ClientInterview({
   const progress = Math.min((wordCount / 2000) * 100, 100);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-[#0a0a0a] dark:to-[#1a1a2e]">
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-[#0a0a0f] dark:via-[#0f0f1a] dark:to-[#1a1a2e]">
       {/* Premium Sidebar - Desktop: Always visible, Mobile: Toggle with menu */}
-      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-[280px] sm:w-80 bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-2xl border-r border-gray-200 dark:border-gray-800 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-[280px] sm:w-80 bg-white/98 dark:bg-[#0f0f14]/98 backdrop-blur-3xl border-r border-gray-200/50 dark:border-gray-800/50 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-900 dark:to-purple-900/20">
+          <div className="p-4 sm:p-6 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-br from-blue-50/80 via-indigo-50/80 to-purple-50/80 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-xl flex-shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-xl flex-shrink-0 animate-pulse">
                   <BookOpen size={18} className="sm:w-[22px] sm:h-[22px] text-white" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-bold text-sm sm:text-base truncate" style={{ color: 'var(--foreground)' }}>{bookTitle}</h2>
+                  <h2 className="font-bold text-sm sm:text-base truncate bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">{bookTitle}</h2>
                   <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">with {clientName}</p>
                 </div>
               </div>
-              <button onClick={() => setShowSidebar(false)} className="lg:hidden p-2 sm:p-2.5 hover:bg-white/50 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm flex-shrink-0 ml-2">
+              <button onClick={() => setShowSidebar(false)} className="lg:hidden p-2 sm:p-2.5 hover:bg-white/70 dark:hover:bg-gray-800/70 rounded-xl transition-all shadow-sm flex-shrink-0 ml-2">
                 <X size={18} className="sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" />
               </button>
             </div>
@@ -104,7 +104,7 @@ export default function ClientInterview({
           {/* Stats Section */}
           <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 flex-1 overflow-y-auto custom-scrollbar">
             {/* Interview Stats */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-blue-200 dark:border-blue-800 shadow-lg hover:shadow-xl transition-all">
+            <div className="bg-gradient-to-br from-blue-50/90 via-indigo-50/90 to-purple-50/90 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-purple-950/40 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-blue-200/50 dark:border-blue-800/50 shadow-lg hover:shadow-xl transition-all backdrop-blur-sm">
               <h3 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4 flex items-center gap-2">
                 <Sparkles size={14} className="sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400" />
                 Interview Progress
@@ -210,19 +210,19 @@ export default function ClientInterview({
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Premium Top Bar */}
-        <div className="h-14 sm:h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 bg-white/90 dark:bg-[#0f0f0f]/90 backdrop-blur-2xl shadow-sm">
+        <div className="h-14 sm:h-16 border-b border-gray-200/50 dark:border-gray-800/50 flex items-center justify-between px-3 sm:px-6 bg-white/95 dark:bg-[#0f0f14]/95 backdrop-blur-3xl shadow-sm">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             {/* Menu button - ONLY on mobile (lg:hidden) */}
-            <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm flex-shrink-0">
+            <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm flex-shrink-0">
               <Menu size={20} className="sm:w-[22px] sm:h-[22px] text-gray-700 dark:text-gray-300" />
             </button>
-            <h1 className="text-sm sm:text-lg font-bold truncate" style={{ color: 'var(--foreground)' }}>{bookTitle}</h1>
+            <h1 className="text-sm sm:text-lg font-bold truncate bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">{bookTitle}</h1>
           </div>
           {/* Voice button - ALWAYS visible with proper mobile text */}
           <button onClick={onToggleVoice}
-            className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg hover:scale-105 transform flex-shrink-0 ml-2 ${
+            className={`px-3 sm:px-6 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg hover:scale-105 transform flex-shrink-0 ml-2 ${
               isVoiceActive 
-                ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white hover:shadow-2xl' 
+                ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:shadow-2xl' 
                 : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`} style={!isVoiceActive ? { color: 'var(--foreground)' } : {}}>
             <span className="hidden xs:inline sm:inline">{isVoiceActive ? '🎤 Voice' : 'Voice'}</span>
@@ -250,10 +250,10 @@ export default function ClientInterview({
 
             {messages.map((msg, i) => (
               <div key={i} className={`mb-4 sm:mb-6 animate-fadeIn ${msg.role === 'user' ? 'flex justify-end' : ''}`}>
-                <div className={`max-w-[90%] sm:max-w-[85%] ${
+                <div className={`max-w-[90%] sm:max-w-[85%] group ${
                   msg.role === 'user' 
-                    ? 'bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 text-white rounded-3xl rounded-br-md shadow-xl hover:shadow-2xl transition-all' 
-                    : 'bg-white dark:bg-[#2a2a2a] rounded-3xl rounded-bl-md shadow-lg hover:shadow-xl border border-gray-100 dark:border-gray-700 transition-all'
+                    ? 'bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white rounded-3xl rounded-br-md shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02]' 
+                    : 'bg-white/95 dark:bg-[#1a1a24]/95 rounded-3xl rounded-bl-md shadow-lg hover:shadow-xl border border-gray-200/50 dark:border-gray-700/50 transition-all hover:scale-[1.01] backdrop-blur-sm'
                 } px-5 sm:px-7 py-4 sm:py-5`} style={msg.role === 'ai' ? { color: 'var(--foreground)' } : {}}>
                   <div className="text-[15px] sm:text-base leading-relaxed">
                     <ReactMarkdown 
@@ -267,7 +267,7 @@ export default function ClientInterview({
                     </ReactMarkdown>
                   </div>
                   {msg.role === 'ai' && (
-                    <button onClick={() => onSpeak(msg.text, i)} className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1.5 sm:gap-2 transition-colors font-medium">
+                    <button onClick={() => onSpeak(msg.text, i)} className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1.5 sm:gap-2 transition-all font-medium opacity-0 group-hover:opacity-100">
                       <Volume2 size={13} className="sm:w-[15px] sm:h-[15px]" />
                       {speakingIndex === i ? '▶ Playing...' : '🔊 Read aloud'}
                     </button>

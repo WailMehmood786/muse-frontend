@@ -171,24 +171,31 @@ export default function ClientInterviewPage({ params }: PageProps) {
         const wordCount = bookDraft.split(/\s+/).filter((w: string) => w.length > 0).length;
         const progress = Math.min(Math.floor(wordCount / 50), 100);
         
-        // Save to localStorage first
+        // ALWAYS save to localStorage first (primary backup)
         const savedClients = localStorage.getItem('muse_clients');
-        if (savedClients) {
-          const clients = JSON.parse(savedClients);
-          const updated = clients.map((c: any) => 
-            c.id === client.id ? { 
-              ...c, 
-              messages, 
-              bookDraft,
-              sessionId,
-              lastActive: new Date().toISOString(),
-              wordCount,
-              progress,
-              status: wordCount >= 5000 ? 'completed' : 'active'
-            } : c
-          );
-          localStorage.setItem('muse_clients', JSON.stringify(updated));
+        let clients = savedClients ? JSON.parse(savedClients) : [];
+        
+        // Find and update or add client
+        const clientIndex = clients.findIndex((c: any) => c.id === client.id);
+        const updatedClient = {
+          ...client,
+          messages,
+          bookDraft,
+          sessionId,
+          lastActive: new Date().toISOString(),
+          wordCount,
+          progress,
+          status: wordCount >= 5000 ? 'completed' : 'active'
+        };
+        
+        if (clientIndex >= 0) {
+          clients[clientIndex] = updatedClient;
+        } else {
+          clients.push(updatedClient);
         }
+        
+        localStorage.setItem('muse_clients', JSON.stringify(clients));
+        console.log('✅ Saved to localStorage:', messages.length, 'messages');
         
         // Try to sync with backend
         try {
@@ -200,14 +207,15 @@ export default function ClientInterviewPage({ params }: PageProps) {
             progress,
             status: wordCount >= 5000 ? 'completed' : 'active'
           });
+          console.log('✅ Synced to backend');
         } catch (error) {
-          console.error('Save to backend error (saved locally):', error);
+          console.log('⚠️ Backend sync failed (saved locally)');
         }
       }
     };
     
     // Debounce save
-    const timer = setTimeout(saveToBackend, 2000);
+    const timer = setTimeout(saveToBackend, 1000);
     return () => clearTimeout(timer);
   }, [messages, bookDraft, sessionId, client]);
 
