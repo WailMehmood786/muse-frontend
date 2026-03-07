@@ -115,23 +115,23 @@ export default function Home() {
   }, []);
 
   const loadClientsFromBackend = async () => {
-    // Load from localStorage (primary storage)
-    const savedClients = localStorage.getItem('muse_clients');
-    if (savedClients) {
-      setClients(JSON.parse(savedClients));
-    }
-    
-    // Try backend sync in background (optional)
     try {
+      // Always load from backend first (primary source of truth)
       const res = await axios.get(`${BACKEND_URL}/api/clients?publisherId=publisher_1`);
       
-      if (res.data.success && res.data.clients.length > 0) {
+      if (res.data.success) {
         setClients(res.data.clients);
+        // Sync to localStorage as backup
         localStorage.setItem('muse_clients', JSON.stringify(res.data.clients));
+        console.log(`✅ Loaded ${res.data.clients.length} clients from backend`);
       }
     } catch (error) {
-      // Silently fail - localStorage is primary storage
-      console.log('Using localStorage (backend optional)');
+      console.error('Backend unavailable, loading from localStorage:', error);
+      // Fallback to localStorage only if backend fails
+      const savedClients = localStorage.getItem('muse_clients');
+      if (savedClients) {
+        setClients(JSON.parse(savedClients));
+      }
     }
   };
 
@@ -263,8 +263,8 @@ export default function Home() {
     );
     
     setClients(updatedClients);
-    localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
     
+    // Save to backend first (primary storage)
     try {
       await axios.put(`${BACKEND_URL}/api/clients/${clientId}`, {
         messages: msgs,
@@ -273,40 +273,13 @@ export default function Home() {
         progress,
         status: progress >= 100 ? 'completed' : 'active'
       });
+      // Sync to localStorage as backup
+      localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
+      console.log('✅ Client data saved to backend');
     } catch (error: any) {
-      const status = error?.response?.status;
-      if (status === 404) {
-        const c = clients.find(x => x.id === clientId);
-        if (c) {
-          try {
-            const createRes = await axios.post(`${BACKEND_URL}/api/clients`, {
-              name: c.name,
-              email: c.email,
-              bookTitle: c.bookTitle,
-              sport: c.sport || 'baseball',
-              publisherId: user?.id || 'publisher_1'
-            });
-            const serverClient = createRes.data?.client;
-            if (serverClient) {
-              const reconciled = clients.map(x => x.id === clientId ? { ...x, id: serverClient.id, uniqueLink: serverClient.uniqueLink } : x);
-              setClients(reconciled);
-              localStorage.setItem('muse_clients', JSON.stringify(reconciled));
-              setSelectedClientId(serverClient.id);
-              await axios.put(`${BACKEND_URL}/api/clients/${serverClient.id}`, {
-                messages: msgs,
-                bookDraft: draft,
-                wordCount,
-                progress,
-                status: progress >= 100 ? 'completed' : 'active'
-              });
-            }
-          } catch (e) {
-            console.warn('Recreate+update client failed, keeping local only:', e);
-          }
-        }
-      } else {
-        console.warn('Update client error (using localStorage):', error);
-      }
+      console.error('Backend save failed, using localStorage:', error);
+      // Fallback: save to localStorage only
+      localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
     }
   };
 
@@ -345,7 +318,7 @@ export default function Home() {
       return;
     }
 
-    // Try backend first to get canonical id + link
+    // Always use backend as primary storage
     try {
       const res = await axios.post(`${BACKEND_URL}/api/clients`, {
         name: newClientName,
@@ -354,54 +327,27 @@ export default function Home() {
         sport: newClientSport,
         publisherId: user?.id || 'publisher_1'
       });
+      
       if (res.data?.success && res.data?.client) {
         const serverClient: Client = res.data.client;
         const updated = [...clients, serverClient];
         setClients(updated);
+        // Backup to localStorage
         localStorage.setItem('muse_clients', JSON.stringify(updated));
+        
         setNewClientName('');
         setNewClientEmail('');
         setNewClientBook('');
         setNewClientSport('baseball');
         setShowAddClient(false);
+        
         navigator.clipboard.writeText(serverClient.uniqueLink);
-        alert(`Client ${serverClient.name} added!\n\nLink copied to clipboard.`);
-        return;
+        alert(`✅ Client ${serverClient.name} added!\n\n📋 Link copied to clipboard.\n\n🔗 Share this link with your client.`);
       }
     } catch (error) {
-      console.log('Backend unavailable, falling back to local client');
+      console.error('Failed to create client:', error);
+      alert('❌ Failed to create client. Please check your connection and try again.');
     }
-    
-    // Fallback: local-only client
-    const clientId = `client_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || window.location.origin;
-    const uniqueLink = `${frontendUrl}/interview/${clientId}?name=${encodeURIComponent(newClientName)}&book=${encodeURIComponent(newClientBook)}&sport=${newClientSport}`;
-    const localClient: Client = {
-      id: clientId,
-      name: newClientName,
-      email: newClientEmail,
-      bookTitle: newClientBook,
-      sport: newClientSport,
-      uniqueLink,
-      sessionId: null,
-      lastActive: new Date().toISOString(),
-      status: 'pending',
-      progress: 0,
-      messages: [],
-      bookDraft: '',
-      wordCount: 0
-    };
-    const updatedClients = [...clients, localClient];
-    setClients(updatedClients);
-    localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
-    
-    setNewClientName('');
-    setNewClientEmail('');
-    setNewClientBook('');
-    setNewClientSport('cricket');
-    setShowAddClient(false);
-    navigator.clipboard.writeText(uniqueLink);
-    alert(`Client ${newClientName} added!\n\nLink copied to clipboard.\n\nNote: Share this link - it will work on any device!`);
   };
 
   const handleSelectClient = (clientId: string) => setSelectedClientId(clientId);
@@ -409,7 +355,6 @@ export default function Home() {
     if (confirm('Delete this client and all their data?')) {
       const updatedClients = clients.filter(c => c.id !== clientId);
       setClients(updatedClients);
-      localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
       
       if (selectedClientId === clientId) {
         setSelectedClientId(null);
@@ -417,11 +362,16 @@ export default function Home() {
         setBookDraft('');
       }
       
+      // Delete from backend first
       try {
         await axios.delete(`${BACKEND_URL}/api/clients/${clientId}`);
+        console.log('✅ Client deleted from backend');
       } catch (error) {
-        console.error('Delete client error (deleted locally):', error);
+        console.error('Backend delete failed:', error);
       }
+      
+      // Update localStorage as backup
+      localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
     }
   };
 
