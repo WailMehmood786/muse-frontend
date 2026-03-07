@@ -192,7 +192,9 @@ export default function ClientInterview({
             {messages.map((msg, i) => (
               <div key={i} className={`mb-6 ${msg.role === 'user' ? 'flex justify-end' : ''}`}>
                 <div className={`max-w-[80%] ${msg.role === 'user' ? 'bg-blue-600 text-white rounded-2xl rounded-tr-sm' : 'bg-gray-100 dark:bg-[#2f2f2f] text-gray-900 dark:text-white rounded-2xl rounded-tl-sm'} px-4 py-3`}>
-                  <ReactMarkdown className="text-sm leading-relaxed">{msg.text}</ReactMarkdown>
+                  <div className="text-sm leading-relaxed">
+                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                  </div>
                   {msg.role === 'ai' && (
                     <button onClick={() => onSpeak(msg.text, i)} className="mt-2 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-1">
                       <Volume2 size={12} />
