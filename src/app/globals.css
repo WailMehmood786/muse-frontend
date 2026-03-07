@@ -86,6 +86,7 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   border-radius: 24px;
+  color: #1f2937; /* Force dark text on light background */
 }
 
 .dark .glass-ultra {
@@ -95,6 +96,7 @@ body {
   border-right: 1px solid rgba(255, 255, 255, 0.02);
   border-bottom: 1px solid rgba(255, 255, 255, 0.02);
   box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: #f3f4f6; /* Force light text on dark background */
 }
 
 .glass-card {
@@ -103,12 +105,14 @@ body {
   -webkit-backdrop-filter: blur(25px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+  color: #1f2937; /* Force dark text on light background */
 }
 
 .dark .glass-card {
   background: rgba(20, 20, 25, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  color: #f3f4f6; /* Force light text on dark background */
 }
 
 /* ========== EXTREME HDR NEON GLOWS ========== */
