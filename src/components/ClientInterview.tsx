@@ -80,8 +80,8 @@ export default function ClientInterview({
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-[#0a0a0f] dark:via-[#0f0f1a] dark:to-[#1a1a2e]">
-      {/* Premium Sidebar - Desktop: Always visible, Mobile: Toggle with menu */}
-      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-[280px] sm:w-80 bg-white/98 dark:bg-[#0f0f14]/98 backdrop-blur-3xl border-r border-gray-200/50 dark:border-gray-800/50 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      {/* Premium Sidebar - Toggle with menu button for everyone */}
+      <div className={`fixed inset-y-0 left-0 z-50 w-[280px] sm:w-80 bg-white/98 dark:bg-[#0f0f14]/98 backdrop-blur-3xl border-r border-gray-200/50 dark:border-gray-800/50 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="p-4 sm:p-6 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-br from-blue-50/80 via-indigo-50/80 to-purple-50/80 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30">
@@ -95,7 +95,7 @@ export default function ClientInterview({
                   <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">with {clientName}</p>
                 </div>
               </div>
-              <button onClick={() => setShowSidebar(false)} className="lg:hidden p-2 sm:p-2.5 hover:bg-white/70 dark:hover:bg-gray-800/70 rounded-xl transition-all shadow-sm flex-shrink-0 ml-2">
+              <button onClick={() => setShowSidebar(false)} className="p-2 sm:p-2.5 hover:bg-white/70 dark:hover:bg-gray-800/70 rounded-xl transition-all shadow-sm flex-shrink-0 ml-2">
                 <X size={18} className="sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" />
               </button>
             </div>
@@ -212,8 +212,8 @@ export default function ClientInterview({
         {/* Premium Top Bar */}
         <div className="h-14 sm:h-16 border-b border-gray-200/50 dark:border-gray-800/50 flex items-center justify-between px-3 sm:px-6 bg-white/95 dark:bg-[#0f0f14]/95 backdrop-blur-3xl shadow-sm">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-            {/* Menu button - ONLY on mobile (lg:hidden) */}
-            <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm flex-shrink-0">
+            {/* Menu button - ALWAYS show for everyone (publisher + client) */}
+            <button onClick={() => setShowSidebar(true)} className="p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm flex-shrink-0">
               <Menu size={20} className="sm:w-[22px] sm:h-[22px] text-gray-700 dark:text-gray-300" />
             </button>
             <h1 className="text-sm sm:text-lg font-bold truncate bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">{bookTitle}</h1>

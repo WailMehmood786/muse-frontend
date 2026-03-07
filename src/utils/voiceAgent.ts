@@ -12,7 +12,7 @@ export class VoiceAgent {
   private currentUtterance: SpeechSynthesisUtterance | null = null;
   
   // Settings
-  private silenceTimeout: number = 2000; // 2 seconds - more time to finish speaking
+  private silenceTimeout: number = 2500; // 2.5 seconds - even more time to finish speaking
   private voiceRate: number = 0.9;
   private voicePitch: number = 1.0;
   private voiceVolume: number = 1.0;
@@ -79,10 +79,15 @@ export class VoiceAgent {
 
     let finalTranscript = '';
     let lastProcessedTranscript = ''; // Track what we already processed
+    let processingTimeout: NodeJS.Timeout | null = null;
 
     this.recognition.onresult = (event: any) => {
+      // Clear any existing timers
       if (this.silenceTimer) {
         clearTimeout(this.silenceTimer);
+      }
+      if (processingTimeout) {
+        clearTimeout(processingTimeout);
       }
 
       let interimTranscript = '';
@@ -105,22 +110,34 @@ export class VoiceAgent {
       this.silenceTimer = setTimeout(() => {
         const trimmedTranscript = finalTranscript.trim();
         
-        // Only process if we have text AND it's different from last processed
-        if (trimmedTranscript && trimmedTranscript !== lastProcessedTranscript && !this.isProcessing) {
+        // Only process if:
+        // 1. We have text
+        // 2. It's different from last processed
+        // 3. Not currently processing
+        // 4. Has minimum length (avoid single words)
+        if (trimmedTranscript && 
+            trimmedTranscript !== lastProcessedTranscript && 
+            !this.isProcessing &&
+            trimmedTranscript.length > 3) {
+          
           this.isProcessing = true;
-          lastProcessedTranscript = trimmedTranscript; // Mark as processed
-          this.onFinalTranscript(trimmedTranscript);
-          finalTranscript = '';
+          lastProcessedTranscript = trimmedTranscript;
           
-          // Stop listening after final transcript
-          if (this.isListening) {
-            this.stopListening();
-          }
-          
-          // Reset processing flag after a delay
-          setTimeout(() => {
-            this.isProcessing = false;
-          }, 1000);
+          // Add extra delay before processing to ensure no duplicates
+          processingTimeout = setTimeout(() => {
+            this.onFinalTranscript(trimmedTranscript);
+            finalTranscript = '';
+            
+            // Stop listening after final transcript
+            if (this.isListening) {
+              this.stopListening();
+            }
+            
+            // Reset processing flag after longer delay
+            setTimeout(() => {
+              this.isProcessing = false;
+            }, 1500);
+          }, 300);
         }
       }, this.silenceTimeout);
     };

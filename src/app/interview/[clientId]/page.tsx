@@ -54,7 +54,7 @@ export default function ClientInterviewPage({ params }: PageProps) {
     });
 
     // Configure voice agent
-    voiceAgentRef.current.setSilenceMs(2000); // 2 seconds for better accuracy
+    voiceAgentRef.current.setSilenceMs(2500); // 2.5 seconds for better accuracy
     voiceAgentRef.current.setLanguage('en-US');
     voiceAgentRef.current.setVoice({ rate: 0.92, pitch: 1.05, volume: 1.0 });
 
