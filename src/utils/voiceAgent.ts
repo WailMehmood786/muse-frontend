@@ -80,6 +80,7 @@ export class VoiceAgent {
     let finalTranscript = '';
     let lastProcessedTranscript = ''; // Track what we already processed
     let processingTimeout: NodeJS.Timeout | null = null;
+    let lastProcessedTime = 0; // Track when we last processed
 
     this.recognition.onresult = (event: any) => {
       // Clear any existing timers
@@ -109,19 +110,23 @@ export class VoiceAgent {
       // Set silence timer for final transcript - only if we have new content
       this.silenceTimer = setTimeout(() => {
         const trimmedTranscript = finalTranscript.trim();
+        const now = Date.now();
         
         // Only process if:
         // 1. We have text
         // 2. It's different from last processed
         // 3. Not currently processing
         // 4. Has minimum length (avoid single words)
+        // 5. At least 2 seconds since last processing (prevent rapid duplicates)
         if (trimmedTranscript && 
             trimmedTranscript !== lastProcessedTranscript && 
             !this.isProcessing &&
-            trimmedTranscript.length > 3) {
+            trimmedTranscript.length > 3 &&
+            (now - lastProcessedTime) > 2000) {
           
           this.isProcessing = true;
           lastProcessedTranscript = trimmedTranscript;
+          lastProcessedTime = now;
           
           // Add extra delay before processing to ensure no duplicates
           processingTimeout = setTimeout(() => {
@@ -136,8 +141,8 @@ export class VoiceAgent {
             // Reset processing flag after longer delay
             setTimeout(() => {
               this.isProcessing = false;
-            }, 1500);
-          }, 300);
+            }, 2000); // Increased from 1500ms to 2000ms
+          }, 500); // Increased from 300ms to 500ms
         }
       }, this.silenceTimeout);
     };

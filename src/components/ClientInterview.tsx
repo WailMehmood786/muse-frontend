@@ -79,19 +79,19 @@ export default function ClientInterview({
   const progress = Math.min((wordCount / 2000) * 100, 100);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-[#0a0a0f] dark:via-[#0f0f1a] dark:to-[#1a1a2e]">
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:from-[#0a0a0f] dark:via-[#0f0f1a] dark:to-[#1a1a2e]">
       {/* Premium Sidebar - Toggle with menu button for everyone */}
       <div className={`fixed inset-y-0 left-0 z-50 w-[280px] sm:w-80 bg-white/98 dark:bg-[#0f0f14]/98 backdrop-blur-3xl border-r border-gray-200/50 dark:border-gray-800/50 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="p-4 sm:p-6 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-br from-blue-50/80 via-indigo-50/80 to-purple-50/80 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30">
+          <div className="p-4 sm:p-6 border-b border-gray-200/50 dark:border-gray-800/50 bg-gradient-to-br from-indigo-50/80 via-purple-50/80 to-pink-50/80 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-pink-950/30">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-xl flex-shrink-0 animate-pulse">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-xl flex-shrink-0 animate-pulse">
                   <BookOpen size={18} className="sm:w-[22px] sm:h-[22px] text-white" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-bold text-sm sm:text-base truncate bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">{bookTitle}</h2>
+                  <h2 className="font-bold text-sm sm:text-base truncate bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">{bookTitle}</h2>
                   <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">with {clientName}</p>
                 </div>
               </div>
@@ -104,12 +104,12 @@ export default function ClientInterview({
           {/* Stats Section */}
           <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 flex-1 overflow-y-auto custom-scrollbar">
             {/* Interview Stats */}
-            <div className="bg-gradient-to-br from-blue-50/90 via-indigo-50/90 to-purple-50/90 dark:from-blue-950/40 dark:via-indigo-950/40 dark:to-purple-950/40 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-blue-200/50 dark:border-blue-800/50 shadow-lg hover:shadow-xl transition-all backdrop-blur-sm">
+            <div className="bg-gradient-to-br from-indigo-50/90 via-purple-50/90 to-pink-50/90 dark:from-indigo-950/40 dark:via-purple-950/40 dark:to-pink-950/40 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-indigo-200/50 dark:border-indigo-800/50 shadow-lg hover:shadow-xl transition-all backdrop-blur-sm">
               <h3 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4 flex items-center gap-2">
-                <Sparkles size={14} className="sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400" />
+                <Sparkles size={14} className="sm:w-4 sm:h-4 text-indigo-600 dark:text-indigo-400" />
                 Interview Progress
               </h3>
-              <div className="space-y-2 sm:space-y-3">
+              <div className="space-y-2 sm:space-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300">Messages</span>
                   <span className="text-xs sm:text-sm font-bold" style={{ color: 'var(--foreground)' }}>{messages.length}</span>
@@ -120,7 +120,7 @@ export default function ClientInterview({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300">Completion</span>
-                  <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
+                  <span className="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">{Math.round(progress)}%</span>
                 </div>
               </div>
             </div>
@@ -129,11 +129,11 @@ export default function ClientInterview({
             <div className="bg-white dark:bg-[#1a1a1a] rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-xl transition-all">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <span className="text-xs sm:text-sm font-bold" style={{ color: 'var(--foreground)' }}>Book Progress</span>
-                <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
+                <span className="text-xs sm:text-sm font-bold text-indigo-600 dark:text-indigo-400">{Math.round(progress)}%</span>
               </div>
               <div className="h-2 sm:h-3 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner">
                 <div 
-                  className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-500 shadow-lg relative" 
+                  className="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-500 shadow-lg relative" 
                   style={{ width: `${progress}%` }}
                 >
                   <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
@@ -165,14 +165,14 @@ export default function ClientInterview({
             {isPublisher && wordCount > 0 && (
               <div className="relative">
                 <button onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 hover:scale-105 transform">
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 hover:scale-105 transform">
                   <Download size={16} className="sm:w-[18px] sm:h-[18px]" />
                   Export Your Book
                 </button>
                 {showExportMenu && (
                   <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden">
                     <button onClick={() => handleExport('docx')} className="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800 text-sm flex items-center gap-3 text-gray-700 dark:text-gray-300 transition-colors">
-                      <FileDown size={16} className="text-blue-600" /> 
+                      <FileDown size={16} className="text-indigo-600" /> 
                       <div>
                         <p className="font-medium">DOCX</p>
                         <p className="text-xs text-gray-500">Microsoft Word</p>
@@ -216,13 +216,13 @@ export default function ClientInterview({
             <button onClick={() => setShowSidebar(true)} className="p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm flex-shrink-0">
               <Menu size={20} className="sm:w-[22px] sm:h-[22px] text-gray-700 dark:text-gray-300" />
             </button>
-            <h1 className="text-sm sm:text-lg font-bold truncate bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">{bookTitle}</h1>
+            <h1 className="text-sm sm:text-lg font-bold truncate bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">{bookTitle}</h1>
           </div>
           {/* Voice button - ALWAYS visible with proper mobile text */}
           <button onClick={onToggleVoice}
             className={`px-3 sm:px-6 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg hover:scale-105 transform flex-shrink-0 ml-2 ${
               isVoiceActive 
-                ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white hover:shadow-2xl' 
+                ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white hover:shadow-2xl' 
                 : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`} style={!isVoiceActive ? { color: 'var(--foreground)' } : {}}>
             <span className="hidden xs:inline sm:inline">{isVoiceActive ? '🎤 Voice' : 'Voice'}</span>
@@ -235,14 +235,14 @@ export default function ClientInterview({
           <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
             {messages.length === 0 && (
               <div className="text-center py-8 sm:py-16">
-                <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
                   <MessageSquare size={28} className="sm:w-10 sm:h-10 text-white" />
                 </div>
                 <h2 className="text-xl sm:text-3xl font-bold mb-2 sm:mb-3" style={{ color: 'var(--foreground)' }}>Let's Tell Your Story</h2>
                 <p className="text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 text-sm sm:text-lg max-w-md mx-auto px-4">
                   I'm here to help you create your autobiography. Just speak naturally, and I'll guide you through your journey.
                 </p>
-                <button onClick={onToggleVoice} className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm sm:text-lg shadow-xl hover:shadow-2xl transition-all">
+                <button onClick={onToggleVoice} className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm sm:text-lg shadow-xl hover:shadow-2xl transition-all">
                   Start Your Interview
                 </button>
               </div>
@@ -252,7 +252,7 @@ export default function ClientInterview({
               <div key={i} className={`mb-4 sm:mb-6 animate-fadeIn ${msg.role === 'user' ? 'flex justify-end' : ''}`}>
                 <div className={`max-w-[90%] sm:max-w-[85%] group ${
                   msg.role === 'user' 
-                    ? 'bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white rounded-3xl rounded-br-md shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02]' 
+                    ? 'bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 text-white rounded-3xl rounded-br-md shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02]' 
                     : 'bg-white/95 dark:bg-[#1a1a24]/95 rounded-3xl rounded-bl-md shadow-lg hover:shadow-xl border border-gray-200/50 dark:border-gray-700/50 transition-all hover:scale-[1.01] backdrop-blur-sm'
                 } px-5 sm:px-7 py-4 sm:py-5`} style={msg.role === 'ai' ? { color: 'var(--foreground)' } : {}}>
                   <div className="text-[15px] sm:text-base leading-relaxed">
@@ -279,7 +279,7 @@ export default function ClientInterview({
             {loading && (
               <div className="flex items-center gap-3 sm:gap-4 text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 bg-white dark:bg-[#2a2a2a] rounded-2xl px-5 py-4 shadow-lg border border-gray-100 dark:border-gray-700">
                 <div className="flex gap-2">
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                   <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
@@ -304,7 +304,7 @@ export default function ClientInterview({
                     🎤 Listening...
                   </span>
                 ) : isSpeaking ? (
-                  <span className="inline-flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full text-xs sm:text-sm font-semibold shadow-xl">
+                  <span className="inline-flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full text-xs sm:text-sm font-semibold shadow-xl">
                     <Volume2 size={15} className="sm:w-4 sm:h-4 animate-pulse" />
                     AI is speaking...
                   </span>
@@ -329,7 +329,7 @@ export default function ClientInterview({
                 rows={1} disabled={isListening} />
 
               <button onClick={() => onSend(input)} disabled={!input.trim() || loading}
-                className="p-2.5 sm:p-3 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600 hover:from-blue-700 hover:via-blue-600 hover:to-purple-700 text-white rounded-xl sm:rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:scale-105 flex-shrink-0">
+                className="p-2.5 sm:p-3 bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-600 hover:from-indigo-700 hover:via-purple-600 hover:to-pink-700 text-white rounded-xl sm:rounded-2xl disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:scale-105 flex-shrink-0">
                 {loading ? <Loader2 size={20} className="sm:w-[24px] sm:h-[24px] animate-spin" /> : <Send size={20} className="sm:w-[24px] sm:h-[24px]" />}
               </button>
             </div>

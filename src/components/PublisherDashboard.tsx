@@ -53,7 +53,7 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
             <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your clients</p>
           </div>
           <button onClick={onAddClient} 
-            className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base w-full sm:w-auto justify-center">
+            className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base w-full sm:w-auto justify-center">
             <Plus size={18} className="sm:w-5 sm:h-5" />
             Add Client
           </button>
@@ -98,7 +98,7 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
                 onClick={() => setFilterStatus(status as any)}
                 className={`px-3 sm:px-4 py-2 rounded-lg font-medium text-xs sm:text-sm transition-colors whitespace-nowrap flex-shrink-0 ${
                   filterStatus === status 
-                    ? 'bg-blue-600 text-white' 
+                    ? 'bg-indigo-600 text-white' 
                     : 'bg-gray-100 dark:bg-[#2f2f2f] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}>
                 {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -122,7 +122,7 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
             {!searchQuery && (
               <button 
                 onClick={onAddClient} 
-                className="px-5 sm:px-6 py-2.5 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base">
+                className="px-5 sm:px-6 py-2.5 sm:py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base">
                 Add First Client
               </button>
             )}
@@ -133,12 +133,12 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
               <div 
                 key={client.id} 
                 onClick={() => onSelectClient(client.id)}
-                className="bg-white dark:bg-[#2f2f2f] rounded-xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer group">
+                className="bg-white dark:bg-[#2f2f2f] rounded-xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-lg transition-all cursor-pointer group">
                 
                 {/* Client Header */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-base sm:text-lg mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate" style={{ color: 'var(--foreground)' }}>
+                    <h3 className="font-bold text-base sm:text-lg mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate" style={{ color: 'var(--foreground)' }}>
                       {client.name}
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">{client.bookTitle}</p>
@@ -148,7 +148,7 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
                 {/* Sport Badge */}
                 {client.sport && (
                   <div className="mb-3">
-                    <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-[10px] sm:text-xs font-medium">
+                    <span className="px-2.5 sm:px-3 py-0.5 sm:py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full text-[10px] sm:text-xs font-medium">
                       {client.sport.toUpperCase()}
                     </span>
                   </div>
@@ -158,11 +158,11 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
                 <div className="mb-3 sm:mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">Progress</span>
-                    <span className="text-[10px] sm:text-xs font-bold text-blue-600 dark:text-blue-400">{client.progress}%</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-indigo-600 dark:text-indigo-400">{client.progress}%</span>
                   </div>
                   <div className="h-1.5 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500" 
+                      className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500" 
                       style={{ width: `${client.progress}%` }}
                     />
                   </div>
@@ -186,7 +186,7 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
                     client.status === 'completed' 
                       ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
                       : client.status === 'active' 
-                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' 
+                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400' 
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400'
                   }`}>
                     {client.status.charAt(0).toUpperCase() + client.status.slice(1)}
@@ -196,7 +196,7 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
                   <div className="flex gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={(e) => { e.stopPropagation(); onCopyLink(client.uniqueLink); }}
-                      className="p-1.5 sm:p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
+                      className="p-1.5 sm:p-2 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg transition-colors"
                       title="Copy Link">
                       <Copy size={12} className="sm:w-[14px] sm:h-[14px]" />
                     </button>

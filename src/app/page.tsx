@@ -496,10 +496,10 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 p-3 sm:p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-6 sm:mb-8">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl">
               <span className="text-3xl sm:text-4xl text-white font-bold">M</span>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               Muse Publisher
             </h1>
             <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
@@ -530,7 +530,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={authLoading}
-                className="w-full py-2.5 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-2.5 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {authLoading ? 'Verifying...' : 'Access Dashboard'}
               </button>
@@ -543,32 +543,29 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
-      <div className="h-14 sm:h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 z-10 shadow-lg">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-xl">
-            M
+      {/* Only show header when NOT in interview mode */}
+      {!selectedClientId && (
+        <div className="h-14 sm:h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 z-10 shadow-lg">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-xl">
+              M
+            </div>
+            <div>
+              <span className="font-bold text-base sm:text-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Muse</span>
+              <span className="ml-1 sm:ml-2 px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-[10px] sm:text-xs rounded-full font-semibold">Publisher</span>
+            </div>
           </div>
-          <div>
-            <span className="font-bold text-base sm:text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Muse</span>
-            <span className="ml-1 sm:ml-2 px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] sm:text-xs rounded-full font-semibold">Publisher</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-1 sm:gap-2">
-          {selectedClientId && (
-            <button onClick={() => setSelectedClientId(null)} className="px-2 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
-              <span className="hidden sm:inline">← Dashboard</span>
-              <span className="sm:hidden">←</span>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <button onClick={toggleTheme} className="p-1.5 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
+              {theme === 'light' ? <Moon size={16} className="sm:w-5 sm:h-5" /> : <Sun size={16} className="sm:w-5 sm:h-5" />}
             </button>
-          )}
-          <button onClick={toggleTheme} className="p-1.5 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
-            {theme === 'light' ? <Moon size={16} className="sm:w-5 sm:h-5" /> : <Sun size={16} className="sm:w-5 sm:h-5" />}
-          </button>
-          <button onClick={handleLogout} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm text-xs sm:text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-            <LogOut size={14} className="sm:w-[18px] sm:h-[18px]" />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
+            <button onClick={handleLogout} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm text-xs sm:text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+              <LogOut size={14} className="sm:w-[18px] sm:h-[18px]" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       <main className="flex-1 overflow-hidden">
         {selectedClientId ? (
@@ -638,7 +635,7 @@ export default function Home() {
                 Cancel
               </button>
               <button onClick={handleAddClient}
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm hdr-gradient-blue text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all hover-lift-ultra neon-blue font-semibold">
+                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all hover-lift-ultra font-semibold">
                 Add Client
               </button>
             </div>
