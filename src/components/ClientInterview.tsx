@@ -24,11 +24,13 @@ interface Props {
   onToggleListening: () => void;
   onSpeak: (text: string, index: number) => void;
   speakingIndex: number | null;
+  isPublisher?: boolean; // Optional: true for publisher, false/undefined for client
 }
 
 export default function ClientInterview({
   clientName, bookTitle, messages, input, loading, isListening, isSpeaking, isVoiceActive,
-  wordCount, bookDraft, onSend, onInputChange, onToggleVoice, onToggleListening, onSpeak, speakingIndex
+  wordCount, bookDraft, onSend, onInputChange, onToggleVoice, onToggleListening, onSpeak, speakingIndex,
+  isPublisher = false // Default to false (client mode)
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -108,7 +110,7 @@ export default function ClientInterview({
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">with {clientName}</p>
           </div>
           <div className="flex items-center gap-2">
-            {wordCount > 0 && (
+            {isPublisher && wordCount > 0 && (
               <div className="relative" ref={exportMenuRef}>
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}

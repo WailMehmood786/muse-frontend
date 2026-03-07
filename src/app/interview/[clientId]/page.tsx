@@ -331,6 +331,7 @@ export default function ClientInterviewPage({ params }: PageProps) {
           onToggleListening={toggleListening}
           onSpeak={handleSpeak}
           speakingIndex={speakingIndex}
+          isPublisher={false}
         />
       </div>
     </div>

@@ -534,6 +534,7 @@ export default function Home() {
             onSend={handleSend} onInputChange={setInput}
             onToggleVoice={toggleVoiceAgent} onToggleListening={toggleListening}
             onSpeak={handleSpeak} speakingIndex={speakingIndex}
+            isPublisher={true}
           />
         ) : (
           <PublisherDashboard
