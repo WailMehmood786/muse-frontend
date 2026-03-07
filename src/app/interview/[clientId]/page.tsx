@@ -326,12 +326,12 @@ export default function ClientInterviewPage({ params }: PageProps) {
       {/* Simple Clean Header - No Back/Logout for Client */}
       <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-4">
         <div className="flex items-center justify-center gap-3">
-          <div className="w-10 h-10 rounded-xl hdr-gradient-blue flex items-center justify-center shadow-glow-blue">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-xl">
             <span className="text-white font-bold text-lg">M</span>
           </div>
           <div className="text-center">
-            <h1 className="text-lg sm:text-xl font-bold text-gradient-animate">{client.bookTitle}</h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Interview with {client.name}</p>
+            <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">{client.bookTitle}</h1>
+            <p className="text-xs text-gray-600 dark:text-gray-400">Interview with {client.name}</p>
           </div>
         </div>
       </div>

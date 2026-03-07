@@ -80,8 +80,8 @@ export default function ClientInterview({
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-[#0a0a0a] dark:to-[#1a1a2e]">
-      {/* Premium Sidebar */}
-      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-[280px] sm:w-80 bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-2xl border-r border-gray-200 dark:border-gray-800 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      {/* Premium Sidebar - ALWAYS accessible via menu button */}
+      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-[280px] sm:w-80 bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-2xl border-r border-gray-200 dark:border-gray-800 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-900 dark:to-purple-900/20">
@@ -212,7 +212,8 @@ export default function ClientInterview({
         {/* Premium Top Bar */}
         <div className="h-14 sm:h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 bg-white/90 dark:bg-[#0f0f0f]/90 backdrop-blur-2xl shadow-sm">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-            <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm flex-shrink-0">
+            {/* ALWAYS show menu button - for both publisher and client */}
+            <button onClick={() => setShowSidebar(true)} className="p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm flex-shrink-0">
               <Menu size={20} className="sm:w-[22px] sm:h-[22px] text-gray-700 dark:text-gray-300" />
             </button>
             <h1 className="text-sm sm:text-lg font-bold truncate" style={{ color: 'var(--foreground)' }}>{bookTitle}</h1>
