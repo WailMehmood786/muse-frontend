@@ -81,57 +81,57 @@ export default function ClientInterview({
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-[#0a0a0a] dark:to-[#1a1a2e]">
       {/* Premium Sidebar */}
-      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-80 bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-2xl border-r border-gray-200 dark:border-gray-800 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <div className={`fixed lg:static inset-y-0 left-0 z-50 w-[280px] sm:w-80 bg-white/98 dark:bg-[#0f0f0f]/98 backdrop-blur-2xl border-r border-gray-200 dark:border-gray-800 shadow-2xl transform transition-all duration-300 ease-out ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-900 dark:to-purple-900/20">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-xl animate-pulse">
-                  <BookOpen size={22} className="text-white" />
+          <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-800 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-900 dark:to-purple-900/20">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 flex items-center justify-center shadow-xl flex-shrink-0">
+                  <BookOpen size={18} className="sm:w-[22px] sm:h-[22px] text-white" />
                 </div>
-                <div>
-                  <h2 className="font-bold text-base" style={{ color: 'var(--foreground)' }}>{bookTitle}</h2>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">with {clientName}</p>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-bold text-sm sm:text-base truncate" style={{ color: 'var(--foreground)' }}>{bookTitle}</h2>
+                  <p className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">with {clientName}</p>
                 </div>
               </div>
-              <button onClick={() => setShowSidebar(false)} className="lg:hidden p-2.5 hover:bg-white/50 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm">
-                <X size={20} className="text-gray-700 dark:text-gray-300" />
+              <button onClick={() => setShowSidebar(false)} className="lg:hidden p-2 sm:p-2.5 hover:bg-white/50 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm flex-shrink-0 ml-2">
+                <X size={18} className="sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" />
               </button>
             </div>
           </div>
 
           {/* Stats Section */}
-          <div className="p-6 space-y-5 flex-1 overflow-y-auto custom-scrollbar">
+          <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 flex-1 overflow-y-auto custom-scrollbar">
             {/* Interview Stats */}
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl p-5 border border-blue-200 dark:border-blue-800 shadow-lg hover:shadow-xl transition-all">
-              <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-                <Sparkles size={16} className="text-blue-600 dark:text-blue-400" />
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-blue-200 dark:border-blue-800 shadow-lg hover:shadow-xl transition-all">
+              <h3 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 sm:mb-4 flex items-center gap-2">
+                <Sparkles size={14} className="sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400" />
                 Interview Progress
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-700 dark:text-gray-300">Messages</span>
-                  <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{messages.length}</span>
+                  <span className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300">Messages</span>
+                  <span className="text-xs sm:text-sm font-bold" style={{ color: 'var(--foreground)' }}>{messages.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-700 dark:text-gray-300">Words Written</span>
-                  <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{wordCount.toLocaleString()}</span>
+                  <span className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300">Words Written</span>
+                  <span className="text-xs sm:text-sm font-bold" style={{ color: 'var(--foreground)' }}>{wordCount.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-700 dark:text-gray-300">Completion</span>
-                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
+                  <span className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300">Completion</span>
+                  <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
                 </div>
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl p-5 border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-xl transition-all">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Book Progress</span>
-                <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
+            <div className="bg-white dark:bg-[#1a1a1a] rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-gray-200 dark:border-gray-800 shadow-lg hover:shadow-xl transition-all">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <span className="text-xs sm:text-sm font-bold" style={{ color: 'var(--foreground)' }}>Book Progress</span>
+                <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
               </div>
-              <div className="h-3 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner">
+              <div className="h-2 sm:h-3 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden shadow-inner">
                 <div 
                   className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-500 shadow-lg relative" 
                   style={{ width: `${progress}%` }}
@@ -139,18 +139,18 @@ export default function ClientInterview({
                   <div className="absolute inset-0 bg-white/30 animate-pulse"></div>
                 </div>
               </div>
-              <p className="text-xs text-gray-700 dark:text-gray-300 mt-3 font-medium">
+              <p className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 mt-2 sm:mt-3 font-medium">
                 {wordCount < 2000 ? `${(2000 - wordCount).toLocaleString()} words remaining` : '🎉 Target achieved! Keep going!'}
               </p>
             </div>
 
             {/* Tips Card */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-5 border border-amber-200 dark:border-amber-800 shadow-lg hover:shadow-xl transition-all">
-              <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
-                <Zap size={16} className="text-amber-600 dark:text-amber-400" />
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-amber-200 dark:border-amber-800 shadow-lg hover:shadow-xl transition-all">
+              <h3 className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 mb-2 sm:mb-3 flex items-center gap-2">
+                <Zap size={14} className="sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400" />
                 Quick Tip
               </h3>
-              <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+              <p className="text-[10px] sm:text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
                 {messages.length === 0 
                   ? "Click 'Start Voice' to begin your interview with AI"
                   : messages.length < 5
@@ -165,8 +165,8 @@ export default function ClientInterview({
             {isPublisher && wordCount > 0 && (
               <div className="relative">
                 <button onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="w-full px-5 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl text-sm font-bold transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 hover:scale-105 transform">
-                  <Download size={18} />
+                  className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2 hover:scale-105 transform">
+                  <Download size={16} className="sm:w-[18px] sm:h-[18px]" />
                   Export Your Book
                 </button>
                 {showExportMenu && (
@@ -210,54 +210,55 @@ export default function ClientInterview({
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Premium Top Bar */}
-        <div className="h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-white/90 dark:bg-[#0f0f0f]/90 backdrop-blur-2xl shadow-sm">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm">
-              <Menu size={22} className="text-gray-700 dark:text-gray-300" />
+        <div className="h-14 sm:h-16 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 bg-white/90 dark:bg-[#0f0f0f]/90 backdrop-blur-2xl shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+            <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm flex-shrink-0">
+              <Menu size={20} className="sm:w-[22px] sm:h-[22px] text-gray-700 dark:text-gray-300" />
             </button>
-            <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>{bookTitle}</h1>
+            <h1 className="text-sm sm:text-lg font-bold truncate" style={{ color: 'var(--foreground)' }}>{bookTitle}</h1>
           </div>
           <button onClick={onToggleVoice}
-            className={`px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:scale-105 transform ${
+            className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold transition-all shadow-lg hover:scale-105 transform flex-shrink-0 ml-2 ${
               isVoiceActive 
                 ? 'bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white hover:shadow-2xl' 
                 : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
             }`} style={!isVoiceActive ? { color: 'var(--foreground)' } : {}}>
-            {isVoiceActive ? '🎤 Voice Active' : 'Start Voice Interview'}
+            <span className="hidden sm:inline">{isVoiceActive ? '🎤 Voice Active' : 'Start Voice Interview'}</span>
+            <span className="sm:hidden">{isVoiceActive ? '🎤' : '▶️'}</span>
           </button>
         </div>
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-6 py-8">
+          <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
             {messages.length === 0 && (
-              <div className="text-center py-16">
-                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
-                  <MessageSquare size={40} className="text-white" />
+              <div className="text-center py-8 sm:py-16">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
+                  <MessageSquare size={28} className="sm:w-10 sm:h-10 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--foreground)' }}>Let's Tell Your Story</h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-8 text-lg max-w-md mx-auto">
+                <h2 className="text-xl sm:text-3xl font-bold mb-2 sm:mb-3" style={{ color: 'var(--foreground)' }}>Let's Tell Your Story</h2>
+                <p className="text-gray-700 dark:text-gray-300 mb-6 sm:mb-8 text-sm sm:text-lg max-w-md mx-auto px-4">
                   I'm here to help you create your autobiography. Just speak naturally, and I'll guide you through your journey.
                 </p>
-                <button onClick={onToggleVoice} className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all">
+                <button onClick={onToggleVoice} className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-sm sm:text-lg shadow-xl hover:shadow-2xl transition-all">
                   Start Your Interview
                 </button>
               </div>
             )}
 
             {messages.map((msg, i) => (
-              <div key={i} className={`mb-8 ${msg.role === 'user' ? 'flex justify-end' : ''}`}>
-                <div className={`max-w-[85%] ${
+              <div key={i} className={`mb-4 sm:mb-8 ${msg.role === 'user' ? 'flex justify-end' : ''}`}>
+                <div className={`max-w-[90%] sm:max-w-[85%] ${
                   msg.role === 'user' 
-                    ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-3xl rounded-tr-md shadow-lg' 
-                    : 'bg-white dark:bg-[#1a1a1a] rounded-3xl rounded-tl-md shadow-lg border border-gray-200 dark:border-gray-800'
-                } px-6 py-4`} style={msg.role === 'ai' ? { color: 'var(--foreground)' } : {}}>
-                  <div className="text-[15px] leading-relaxed">
+                    ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-2xl sm:rounded-3xl rounded-tr-md shadow-lg' 
+                    : 'bg-white dark:bg-[#1a1a1a] rounded-2xl sm:rounded-3xl rounded-tl-md shadow-lg border border-gray-200 dark:border-gray-800'
+                } px-4 sm:px-6 py-3 sm:py-4`} style={msg.role === 'ai' ? { color: 'var(--foreground)' } : {}}>
+                  <div className="text-sm sm:text-[15px] leading-relaxed">
                     <ReactMarkdown>{msg.text}</ReactMarkdown>
                   </div>
                   {msg.role === 'ai' && (
-                    <button onClick={() => onSpeak(msg.text, i)} className="mt-3 text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-2 transition-colors">
-                      <Volume2 size={14} />
+                    <button onClick={() => onSpeak(msg.text, i)} className="mt-2 sm:mt-3 text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1 sm:gap-2 transition-colors">
+                      <Volume2 size={12} className="sm:w-[14px] sm:h-[14px]" />
                       {speakingIndex === i ? 'Playing...' : 'Read aloud'}
                     </button>
                   )}
@@ -266,13 +267,13 @@ export default function ClientInterview({
             ))}
 
             {loading && (
-              <div className="flex items-center gap-3 text-gray-500 dark:text-gray-400 mb-8">
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="flex items-center gap-2 sm:gap-3 text-gray-500 dark:text-gray-400 mb-4 sm:mb-8">
+                <div className="flex gap-1 sm:gap-1.5">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
-                <span className="text-sm font-medium">AI is thinking...</span>
+                <span className="text-xs sm:text-sm font-medium">AI is thinking...</span>
               </div>
             )}
             <div ref={scrollRef} />
@@ -280,46 +281,46 @@ export default function ClientInterview({
         </div>
 
         {/* Premium Input Area */}
-        <div className="border-t border-gray-200 dark:border-gray-800 p-6 bg-white/80 dark:bg-[#0f0f0f]/80 backdrop-blur-xl">
+        <div className="border-t border-gray-200 dark:border-gray-800 p-3 sm:p-6 bg-white/80 dark:bg-[#0f0f0f]/80 backdrop-blur-xl">
           <div className="max-w-4xl mx-auto">
             {isVoiceActive && (
-              <div className="mb-4 text-center">
+              <div className="mb-3 sm:mb-4 text-center">
                 {isListening ? (
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full text-sm font-medium shadow-lg">
-                    <span className="relative flex h-3 w-3">
+                  <span className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full text-xs sm:text-sm font-medium shadow-lg">
+                    <span className="relative flex h-2 w-2 sm:h-3 sm:w-3">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-red-500"></span>
                     </span>
                     Listening to your story...
                   </span>
                 ) : isSpeaking ? (
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium shadow-lg">
-                    <Volume2 size={16} className="animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full text-xs sm:text-sm font-medium shadow-lg">
+                    <Volume2 size={14} className="sm:w-4 sm:h-4 animate-pulse" />
                     AI is speaking...
                   </span>
                 ) : null}
               </div>
             )}
 
-            <div className="flex items-end gap-3 bg-gray-100 dark:bg-[#1a1a1a] rounded-2xl p-3 border border-gray-200 dark:border-gray-800 shadow-lg">
+            <div className="flex items-end gap-2 sm:gap-3 bg-gray-100 dark:bg-[#1a1a1a] rounded-xl sm:rounded-2xl p-2 sm:p-3 border border-gray-200 dark:border-gray-800 shadow-lg">
               <button onClick={onToggleListening} disabled={!isVoiceActive}
-                className={`p-3 rounded-xl transition-all ${
+                className={`p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all flex-shrink-0 ${
                   isListening 
                     ? 'bg-gradient-to-br from-red-500 to-pink-500 text-white shadow-lg' 
                     : 'hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}>
-                {isListening ? <Mic size={22} /> : <MicOff size={22} />}
+                {isListening ? <Mic size={18} className="sm:w-[22px] sm:h-[22px]" /> : <MicOff size={18} className="sm:w-[22px] sm:h-[22px]" />}
               </button>
 
               <textarea ref={textareaRef} value={input} onChange={(e) => onInputChange(e.target.value)} onKeyDown={handleKeyDown}
                 placeholder="Type your message or use voice..."
                 style={{ color: 'var(--foreground)' }}
-                className="flex-1 bg-transparent outline-none resize-none max-h-32 text-[15px] placeholder:text-gray-500"
+                className="flex-1 bg-transparent outline-none resize-none max-h-24 sm:max-h-32 text-sm sm:text-[15px] placeholder:text-gray-500"
                 rows={1} disabled={isListening} />
 
               <button onClick={() => onSend(input)} disabled={!input.trim() || loading}
-                className="p-3 bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg">
-                {loading ? <Loader2 size={22} className="animate-spin" /> : <Send size={22} />}
+                className="p-2 sm:p-3 bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg sm:rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg flex-shrink-0">
+                {loading ? <Loader2 size={18} className="sm:w-[22px] sm:h-[22px] animate-spin" /> : <Send size={18} className="sm:w-[22px] sm:h-[22px]" />}
               </button>
             </div>
           </div>

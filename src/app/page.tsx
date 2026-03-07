@@ -543,27 +543,28 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
-      <div className="h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sm:px-6 z-10 shadow-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-xl">
+      <div className="h-14 sm:h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 z-10 shadow-lg">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-xl">
             M
           </div>
           <div>
-            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Muse</span>
-            <span className="ml-2 px-2.5 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs rounded-full font-semibold">Publisher</span>
+            <span className="font-bold text-base sm:text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Muse</span>
+            <span className="ml-1 sm:ml-2 px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] sm:text-xs rounded-full font-semibold">Publisher</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {selectedClientId && (
-            <button onClick={() => setSelectedClientId(null)} className="px-4 py-2.5 text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
-              ← Dashboard
+            <button onClick={() => setSelectedClientId(null)} className="px-2 sm:px-4 py-1.5 sm:py-2.5 text-xs sm:text-sm font-semibold hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
+              <span className="hidden sm:inline">← Dashboard</span>
+              <span className="sm:hidden">←</span>
             </button>
           )}
-          <button onClick={toggleTheme} className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
-            {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          <button onClick={toggleTheme} className="p-1.5 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
+            {theme === 'light' ? <Moon size={16} className="sm:w-5 sm:h-5" /> : <Sun size={16} className="sm:w-5 sm:h-5" />}
           </button>
-          <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-            <LogOut size={18} />
+          <button onClick={handleLogout} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm text-xs sm:text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+            <LogOut size={14} className="sm:w-[18px] sm:h-[18px]" />
             <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
