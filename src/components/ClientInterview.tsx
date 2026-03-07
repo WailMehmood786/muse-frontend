@@ -113,16 +113,16 @@ export default function ClientInterview({
       />
 
       {/* Ultra Professional Header */}
-      <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 p-3 sm:p-4">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl hdr-gradient-blue flex items-center justify-center shadow-glow-blue animate-glow-pulse">
-                <Brain size={20} className="text-white" />
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-lg hdr-gradient-blue flex items-center justify-center shadow-glow-blue">
+                <Brain size={16} className="text-white" />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-gradient-animate">{bookTitle}</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">with {clientName}</p>
+                <h1 className="text-lg sm:text-xl font-bold text-gradient-animate">{bookTitle}</h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">with {clientName}</p>
               </div>
             </div>
           </div>
@@ -131,9 +131,9 @@ export default function ClientInterview({
               <div className="relative" ref={exportMenuRef}>
                 <button
                   onClick={() => setShowExportMenu(!showExportMenu)}
-                  className="flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover-lift hdr-gradient-forest text-white neon-green"
+                  className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover-lift hdr-gradient-forest text-white neon-green text-sm"
                 >
-                  <Download size={18} />
+                  <Download size={16} />
                   <span className="hidden sm:inline">Export</span>
                 </button>
 
@@ -184,7 +184,7 @@ export default function ClientInterview({
               </div>
             )}
             <button onClick={onToggleVoice}
-              className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover-lift ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover-lift text-sm ${
                 isVoiceActive ? 'hdr-gradient-blue text-white neon-blue animate-glow-pulse' : 'glass-card hover-glow'
               }`}>
               {isVoiceActive ? (
@@ -194,7 +194,7 @@ export default function ClientInterview({
                 </>
               ) : (
                 <>
-                  <Zap size={18} />
+                  <Zap size={16} />
                   <span className="hidden sm:inline">Start Voice</span>
                 </>
               )}
