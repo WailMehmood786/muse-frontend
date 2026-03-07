@@ -113,7 +113,7 @@ export default function ClientInterview({
       />
 
       {/* Ultra Compact Header */}
-      <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 p-2 sm:p-3">
+      <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 p-2">
         <div className="flex items-center justify-between mb-2">
           <div className="flex-1">
             <div className="flex items-center gap-2">
@@ -340,7 +340,7 @@ export default function ClientInterview({
 
             <textarea ref={textareaRef} value={input} onChange={(e) => onInputChange(e.target.value)} onKeyDown={handleKeyDown}
               placeholder={isListening ? "🎤 Listening... tell me your story" : "Share your story here, or use voice..."}
-              className="flex-1 bg-transparent outline-none py-3 px-3 resize-none max-h-32 text-sm sm:text-base placeholder:text-gray-400 dark:placeholder:text-gray-500"
+              className="flex-1 bg-transparent outline-none py-3 px-3 resize-none max-h-32 text-sm sm:text-base placeholder:text-gray-400 dark:placeholder:text-gray-500 text-gray-900 dark:text-gray-100"
               rows={1} disabled={isListening} />
 
             <button onClick={() => onSend(input)} disabled={!input.trim() || loading}

@@ -1,6 +1,5 @@
 "use client";
 
-import type { Metadata } from "next";
 import "./globals.css";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -13,6 +12,11 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <title>Muse - AI Autobiography Interview Platform</title>
+        <meta name="description" content="Create your autobiography with AI-powered interviews. Tell your story, we'll write your book." />
+        <link rel="icon" href="/favicon.ico" />
+      </head>
       <body>
         <GoogleOAuthProvider clientId={googleClientId}>
           {children}
