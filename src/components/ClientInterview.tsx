@@ -111,15 +111,15 @@ export default function ClientInterview({
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-600 dark:text-gray-400">Messages</span>
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">{messages.length}</span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">Messages</span>
+                  <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{messages.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-600 dark:text-gray-400">Words Written</span>
-                  <span className="text-sm font-bold text-gray-900 dark:text-white">{wordCount.toLocaleString()}</span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">Words Written</span>
+                  <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{wordCount.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-600 dark:text-gray-400">Completion</span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">Completion</span>
                   <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
                 </div>
               </div>
@@ -128,7 +128,7 @@ export default function ClientInterview({
             {/* Progress Bar */}
             <div className="bg-white dark:bg-[#1a1a1a] rounded-2xl p-4 border border-gray-200 dark:border-gray-800 shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Book Progress</span>
+                <span className="text-xs font-semibold" style={{ color: 'var(--foreground)' }}>Book Progress</span>
                 <span className="text-xs font-bold text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
               </div>
               <div className="h-2.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
@@ -137,7 +137,7 @@ export default function ClientInterview({
                   style={{ width: `${progress}%` }} 
                 />
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
                 {wordCount < 2000 ? `${(2000 - wordCount).toLocaleString()} words remaining` : '🎉 Target achieved! Keep going!'}
               </p>
             </div>
@@ -213,7 +213,7 @@ export default function ClientInterview({
             <button onClick={() => setShowSidebar(true)} className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
               <Menu size={20} className="text-gray-600 dark:text-gray-400" />
             </button>
-            <h1 className="text-base font-semibold text-gray-900 dark:text-white">{bookTitle}</h1>
+            <h1 className="text-base font-semibold" style={{ color: 'var(--foreground)' }}>{bookTitle}</h1>
           </div>
           <button onClick={onToggleVoice}
             className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg ${
@@ -233,8 +233,8 @@ export default function ClientInterview({
                 <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
                   <MessageSquare size={40} className="text-white" />
                 </div>
-                <h2 className="text-3xl font-bold mb-3 text-gray-900 dark:text-white">Let's Tell Your Story</h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-8 text-lg max-w-md mx-auto">
+                <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--foreground)' }}>Let's Tell Your Story</h2>
+                <p className="text-gray-700 dark:text-gray-300 mb-8 text-lg max-w-md mx-auto">
                   I'm here to help you create your autobiography. Just speak naturally, and I'll guide you through your journey.
                 </p>
                 <button onClick={onToggleVoice} className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all">
@@ -248,8 +248,8 @@ export default function ClientInterview({
                 <div className={`max-w-[85%] ${
                   msg.role === 'user' 
                     ? 'bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-3xl rounded-tr-md shadow-lg' 
-                    : 'bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white rounded-3xl rounded-tl-md shadow-lg border border-gray-200 dark:border-gray-800'
-                } px-6 py-4`}>
+                    : 'bg-white dark:bg-[#1a1a1a] rounded-3xl rounded-tl-md shadow-lg border border-gray-200 dark:border-gray-800'
+                } px-6 py-4`} style={msg.role === 'ai' ? { color: 'var(--foreground)' } : {}}>
                   <div className="text-[15px] leading-relaxed">
                     <ReactMarkdown>{msg.text}</ReactMarkdown>
                   </div>
@@ -311,7 +311,8 @@ export default function ClientInterview({
 
               <textarea ref={textareaRef} value={input} onChange={(e) => onInputChange(e.target.value)} onKeyDown={handleKeyDown}
                 placeholder="Type your message or use voice..."
-                className="flex-1 bg-transparent outline-none resize-none max-h-32 text-[15px] text-gray-900 dark:text-white placeholder:text-gray-500"
+                style={{ color: 'var(--foreground)' }}
+                className="flex-1 bg-transparent outline-none resize-none max-h-32 text-[15px] placeholder:text-gray-500"
                 rows={1} disabled={isListening} />
 
               <button onClick={() => onSend(input)} disabled={!input.trim() || loading}

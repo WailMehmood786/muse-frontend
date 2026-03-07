@@ -26,9 +26,26 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force proper text colors for visibility */
+.text-visible-light {
+  color: #1f2937 !important;
+}
+
+.text-visible-dark {
+  color: #f3f4f6 !important;
+}
+
+.dark .text-visible-light {
+  color: #f3f4f6 !important;
+}
+
+.dark .text-visible-dark {
+  color: #1f2937 !important;
 }
 
 /* ========== ULTRA HDR ANIMATIONS (60FPS OPTIMIZED) ========== */

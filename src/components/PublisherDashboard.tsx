@@ -49,7 +49,7 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
       <div className="border-b border-gray-200 dark:border-gray-800 p-6 bg-white dark:bg-[#212121]">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Publisher Dashboard</h1>
+            <h1 className="text-3xl font-bold" style={{ color: 'var(--foreground)' }}>Publisher Dashboard</h1>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your clients</p>
           </div>
           <button onClick={onAddClient} 
@@ -65,8 +65,8 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
             <div key={i} className="bg-gray-50 dark:bg-[#2f2f2f] rounded-xl p-4 border border-gray-200 dark:border-gray-700">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <p className="text-xs text-gray-600 dark:text-gray-400 uppercase font-medium mb-2">{stat.label}</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                  <p className="text-xs text-gray-700 dark:text-gray-300 uppercase font-medium mb-2">{stat.label}</p>
+                  <p className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>{stat.value}</p>
                 </div>
                 <div className={`p-3 rounded-xl ${stat.color} text-white`}>
                   <stat.icon size={20} />
@@ -87,7 +87,8 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
               value={searchQuery} 
               onChange={(e) => setSearchQuery(e.target.value)} 
               placeholder="Search clients..."
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-[#2f2f2f] border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-white placeholder:text-gray-500" 
+              style={{ color: 'var(--foreground)' }}
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-[#2f2f2f] border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500" 
             />
           </div>
           <div className="flex gap-2">
@@ -114,7 +115,7 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
             <div className="w-20 h-20 bg-gray-200 dark:bg-gray-700 rounded-2xl flex items-center justify-center mb-4">
               <Users size={40} className="text-gray-400 dark:text-gray-500" />
             </div>
-            <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">No clients found</h3>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: 'var(--foreground)' }}>No clients found</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               {searchQuery ? 'Try a different search term' : 'Add your first client to get started'}
             </p>
@@ -137,7 +138,7 @@ export default function PublisherDashboard({ clients, onSelectClient, onAddClien
                 {/* Client Header */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                    <h3 className="font-bold text-lg mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400" style={{ color: 'var(--foreground)' }}>
                       {client.name}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{client.bookTitle}</p>

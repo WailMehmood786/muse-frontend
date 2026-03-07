@@ -595,26 +595,30 @@ export default function Home() {
       {showAddClient && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
           <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-800 shadow-ultra glass-ultra">
-            <h2 className="text-2xl font-bold mb-6 text-gradient-animate">Add New Client</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gradient-animate" style={{ color: 'var(--foreground)' }}>Add New Client</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Client Name</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>Client Name</label>
                 <input type="text" value={newClientName} onChange={(e) => setNewClientName(e.target.value)} placeholder="John Doe"
+                  style={{ color: 'var(--foreground)' }}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>Email</label>
                 <input type="email" value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} placeholder="john@example.com"
+                  style={{ color: 'var(--foreground)' }}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Book Title</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>Book Title</label>
                 <input type="text" value={newClientBook} onChange={(e) => setNewClientBook(e.target.value)} placeholder="My Amazing Story"
+                  style={{ color: 'var(--foreground)' }}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Sport</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--foreground)' }}>Sport</label>
                 <select value={newClientSport} onChange={(e) => setNewClientSport(e.target.value)}
+                  style={{ color: 'var(--foreground)' }}
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                   <option value="baseball">Baseball ⚾</option>
                   <option value="football">Football 🏈</option>
