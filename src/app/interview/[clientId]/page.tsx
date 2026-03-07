@@ -4,8 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import ClientInterview from '@/components/ClientInterview';
 import { VoiceAgent } from '@/utils/voiceAgent';
-import Link from 'next/link';
-import { ArrowLeft, AlertTriangle } from 'lucide-react';
 
 type Message = {
   role: 'user' | 'ai';
@@ -273,42 +271,32 @@ export default function ClientInterviewPage({ params }: PageProps) {
 
   if (!client) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#0a0a0a] dark:to-[#111] p-4">
-        <div className="text-center max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 p-4">
+        <div className="text-center max-w-md glass-card rounded-2xl p-8">
           <div className="w-20 h-20 mx-auto mb-6 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center">
-            <AlertTriangle size={40} className="text-red-500" />
+            <span className="text-4xl">⚠️</span>
           </div>
-          <h2 className="text-2xl font-bold mb-3">Invalid Interview Link</h2>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
+          <h2 className="text-2xl font-bold mb-3 text-gradient-animate">Invalid Interview Link</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             This interview link is not valid or has expired. Please contact your publisher for a new link.
           </p>
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-200"
-          >
-            <ArrowLeft size={18} />
-            Go to Home
-          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-[#0a0a0a]">
-      {/* Header */}
-      <div className="h-14 bg-white/80 dark:bg-[#111]/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="p-2 hover:bg-gray-100 dark:hover:bg-[#222] rounded-lg transition-colors">
-            <ArrowLeft size={18} />
-          </Link>
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg">
-            M
+    <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
+      {/* Simple Clean Header - No Back/Logout for Client */}
+      <div className="glass-ultra border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-4">
+        <div className="flex items-center justify-center gap-3">
+          <div className="w-10 h-10 rounded-xl hdr-gradient-blue flex items-center justify-center shadow-glow-blue">
+            <span className="text-white font-bold text-lg">M</span>
           </div>
-          <span className="font-bold text-lg hidden sm:inline">Muse</span>
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Interview for {client.name}
+          <div className="text-center">
+            <h1 className="text-lg sm:text-xl font-bold text-gradient-animate">{client.bookTitle}</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Interview with {client.name}</p>
+          </div>
         </div>
       </div>
 
