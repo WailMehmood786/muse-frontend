@@ -116,8 +116,13 @@ export default function Home() {
 
   const loadClientsFromBackend = async () => {
     try {
+      // Get token
+      const token = localStorage.getItem('muse_publisher_token');
+      
       // Always load from backend first (primary source of truth)
-      const res = await axios.get(`${BACKEND_URL}/api/clients?publisherId=publisher_1`);
+      const res = await axios.get(`${BACKEND_URL}/api/clients?publisherId=publisher_1`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
       
       if (res.data.success) {
         setClients(res.data.clients);
@@ -318,6 +323,13 @@ export default function Home() {
       return;
     }
 
+    // Get token from localStorage
+    const token = localStorage.getItem('muse_publisher_token');
+    if (!token) {
+      alert('❌ Please login again');
+      return;
+    }
+
     // Always use backend as primary storage
     try {
       const res = await axios.post(`${BACKEND_URL}/api/clients`, {
@@ -326,6 +338,10 @@ export default function Home() {
         bookTitle: newClientBook,
         sport: newClientSport,
         publisherId: user?.id || 'publisher_1'
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       if (res.data?.success && res.data?.client) {
@@ -344,9 +360,10 @@ export default function Home() {
         navigator.clipboard.writeText(serverClient.uniqueLink);
         alert(`✅ Client ${serverClient.name} added!\n\n📋 Link copied to clipboard.\n\n🔗 Share this link with your client.`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create client:', error);
-      alert('❌ Failed to create client. Please check your connection and try again.');
+      const errorMsg = error?.response?.data?.error || 'Failed to create client';
+      alert(`❌ ${errorMsg}\n\nPlease check your connection and try again.`);
     }
   };
 
