@@ -5,7 +5,7 @@ import axios from 'axios';
 import PublisherDashboard from '@/components/PublisherDashboard';
 import ClientInterview from '@/components/ClientInterview';
 import { VoiceAgent } from '@/utils/voiceAgent';
-import { Sun, Moon, LogOut } from 'lucide-react';
+import { Sun, Moon, LogOut, X, Loader2 } from 'lucide-react';
 
 // Ultra HDR Design
 
@@ -481,95 +481,105 @@ export default function Home() {
   // Show simple password screen for publisher
   if (showAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 p-3 sm:p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-6 sm:mb-8">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl">
-              <span className="text-3xl sm:text-4xl text-white font-bold">M</span>
+      <div className="min-h-screen flex items-center justify-center p-4"
+        style={{ background: 'var(--bg-subtle)' }}>
+        <div className="w-full max-w-sm animate-fadeUp">
+
+          {/* Logo */}
+          <div className="text-center mb-8">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-2xl flex items-center justify-center text-white font-bold text-xl"
+              style={{ background: 'var(--accent)', boxShadow: '0 8px 24px rgba(91,91,214,0.35)' }}>
+              M
             </div>
-            <h1 className="text-2xl sm:text-4xl font-bold mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Muse Publisher
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-              Enter password to access dashboard
+            <h1 className="text-title" style={{ color: 'var(--fg)' }}>Muse Publisher</h1>
+            <p className="text-small mt-1" style={{ color: 'var(--fg-muted)' }}>
+              Sign in to access your dashboard
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl p-5 sm:p-8">
-            <form onSubmit={handlePublisherLogin} className="space-y-3 sm:space-y-4">
+          {/* Card */}
+          <div className="card p-6" style={{ boxShadow: 'var(--shadow-lg)' }}>
+            <form onSubmit={handlePublisherLogin} className="space-y-4">
               <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2 text-gray-800 dark:text-gray-200">
+                <label className="text-label block mb-1.5" style={{ color: 'var(--fg-muted)' }}>
                   Password
                 </label>
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter publisher password"
-                  style={{ color: 'var(--foreground)' }}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-900"
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="input"
                   autoFocus
                 />
                 {authError && (
-                  <p className="mt-2 text-xs sm:text-sm text-red-600 dark:text-red-400">{authError}</p>
+                  <p className="text-small mt-2" style={{ color: 'var(--danger)' }}>{authError}</p>
                 )}
               </div>
-
               <button
                 type="submit"
                 disabled={authLoading}
-                className="w-full py-2.5 sm:py-3 text-sm sm:text-base bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn btn-primary w-full"
+                style={{ padding: '10px', fontSize: '14px' }}
               >
-                {authLoading ? 'Verifying...' : 'Access Dashboard'}
+                {authLoading ? (
+                  <><Loader2 size={15} className="animate-spin" /> Verifying...</>
+                ) : 'Access Dashboard'}
               </button>
             </form>
           </div>
+
+          <p className="text-center text-small mt-4" style={{ color: 'var(--fg-faint)' }}>
+            Muse — AI-powered autobiography platform
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
-      {/* Only show header when NOT in interview mode */}
+    <div className="h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
+      {/* Dashboard Header */}
       {!selectedClientId && (
-        <div className="h-14 sm:h-16 bg-white/90 dark:bg-gray-900/90 backdrop-blur-2xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-6 z-10 shadow-lg">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-xl">
+        <header className="flex-shrink-0 h-14 flex items-center justify-between px-5"
+          style={{ borderBottom: '1px solid var(--border)', background: 'var(--card)' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-sm font-bold"
+              style={{ background: 'var(--accent)' }}>
               M
             </div>
-            <div>
-              <span className="font-bold text-base sm:text-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Muse</span>
-              <span className="ml-1 sm:ml-2 px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 text-[10px] sm:text-xs rounded-full font-semibold">Publisher</span>
-            </div>
+            <span className="text-heading" style={{ color: 'var(--fg)' }}>Muse</span>
+            <span className="badge badge-blue">Publisher</span>
           </div>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <button onClick={toggleTheme} className="p-1.5 sm:p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm" style={{ color: 'var(--foreground)' }}>
-              {theme === 'light' ? <Moon size={16} className="sm:w-5 sm:h-5" /> : <Sun size={16} className="sm:w-5 sm:h-5" />}
+          <div className="flex items-center gap-2">
+            <button onClick={toggleTheme} className="btn btn-ghost btn-icon">
+              {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
             </button>
-            <button onClick={handleLogout} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg sm:rounded-xl transition-all shadow-sm text-xs sm:text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-              <LogOut size={14} className="sm:w-[18px] sm:h-[18px]" />
+            <button onClick={handleLogout} className="btn btn-ghost" style={{ fontSize: '13px' }}>
+              <LogOut size={14} />
               <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
-        </div>
+        </header>
       )}
 
       <main className="flex-1 overflow-hidden">
         {selectedClientId ? (
           <div className="h-full flex flex-col">
-            {/* Publisher interview top bar - back + logout */}
-            <div className="h-12 sm:h-14 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-5 flex-shrink-0">
-              <button onClick={() => { setSelectedClientId(null); setMessages([]); setBookDraft(''); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+            {/* Publisher interview bar */}
+            <div className="flex-shrink-0 h-12 flex items-center justify-between px-4"
+              style={{ borderBottom: '1px solid var(--border)', background: 'var(--card)' }}>
+              <button
+                onClick={() => { setSelectedClientId(null); setMessages([]); setBookDraft(''); }}
+                className="btn btn-ghost" style={{ fontSize: '13px' }}>
                 ← Dashboard
               </button>
-              <div className="flex items-center gap-1">
-                <button onClick={toggleTheme} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all" style={{ color: 'var(--foreground)' }}>
-                  {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
+              <div className="flex items-center gap-1.5">
+                <button onClick={toggleTheme} className="btn btn-ghost btn-icon">
+                  {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
                 </button>
-                <button onClick={handleLogout} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
-                  <LogOut size={14} />
+                <button onClick={handleLogout} className="btn btn-ghost" style={{ fontSize: '13px' }}>
+                  <LogOut size={13} />
                   <span className="hidden sm:inline">Logout</span>
                 </button>
               </div>
@@ -598,53 +608,57 @@ export default function Home() {
         )}
       </main>
 
+      {/* Add Client Modal */}
       {showAddClient && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl w-full max-w-md p-4 sm:p-6 border border-gray-200 dark:border-gray-800 shadow-ultra glass-ultra max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gradient-animate" style={{ color: 'var(--foreground)' }}>Add New Client</h2>
-            <div className="space-y-3 sm:space-y-4">
+        <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) setShowAddClient(false); }}>
+          <div className="modal p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-title" style={{ color: 'var(--fg)' }}>New Client</h2>
+              <button onClick={() => setShowAddClient(false)} className="btn btn-ghost btn-icon">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              {[
+                { label: 'Full Name', value: newClientName, setter: setNewClientName, placeholder: 'John Smith', type: 'text' },
+                { label: 'Email Address', value: newClientEmail, setter: setNewClientEmail, placeholder: 'john@example.com', type: 'email' },
+                { label: 'Book Title', value: newClientBook, setter: setNewClientBook, placeholder: 'My Life Story', type: 'text' },
+              ].map(f => (
+                <div key={f.label}>
+                  <label className="text-label block mb-1.5" style={{ color: 'var(--fg-muted)' }}>{f.label}</label>
+                  <input
+                    type={f.type}
+                    value={f.value}
+                    onChange={e => f.setter(e.target.value)}
+                    placeholder={f.placeholder}
+                    className="input"
+                  />
+                </div>
+              ))}
               <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2" style={{ color: 'var(--foreground)' }}>Client Name</label>
-                <input type="text" value={newClientName} onChange={(e) => setNewClientName(e.target.value)} placeholder="John Doe"
-                  style={{ color: 'var(--foreground)' }}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
-              </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2" style={{ color: 'var(--foreground)' }}>Email</label>
-                <input type="email" value={newClientEmail} onChange={(e) => setNewClientEmail(e.target.value)} placeholder="john@example.com"
-                  style={{ color: 'var(--foreground)' }}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
-              </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2" style={{ color: 'var(--foreground)' }}>Book Title</label>
-                <input type="text" value={newClientBook} onChange={(e) => setNewClientBook(e.target.value)} placeholder="My Amazing Story"
-                  style={{ color: 'var(--foreground)' }}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all" />
-              </div>
-              <div>
-                <label className="block text-xs sm:text-sm font-medium mb-1.5 sm:mb-2" style={{ color: 'var(--foreground)' }}>Sport</label>
-                <select value={newClientSport} onChange={(e) => setNewClientSport(e.target.value)}
-                  style={{ color: 'var(--foreground)' }}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-                  <option value="baseball">Baseball ⚾</option>
-                  <option value="football">Football 🏈</option>
-                  <option value="basketball">Basketball 🏀</option>
-                  <option value="cricket">Cricket 🏏</option>
-                  <option value="boxing">Boxing 🥊</option>
-                  <option value="athletics">Athletics 🏃</option>
-                  <option value="tennis">Tennis 🎾</option>
-                  <option value="other">Other</option>
+                <label className="text-label block mb-1.5" style={{ color: 'var(--fg-muted)' }}>Sport</label>
+                <select
+                  value={newClientSport}
+                  onChange={e => setNewClientSport(e.target.value)}
+                  className="input"
+                >
+                  <option value="baseball">⚾ Baseball</option>
+                  <option value="football">🏈 Football</option>
+                  <option value="basketball">🏀 Basketball</option>
+                  <option value="cricket">🏏 Cricket</option>
+                  <option value="boxing">🥊 Boxing</option>
+                  <option value="athletics">🏃 Athletics</option>
+                  <option value="tennis">🎾 Tennis</option>
+                  <option value="other">🏆 Other</option>
                 </select>
               </div>
             </div>
-            <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
-              <button onClick={() => setShowAddClient(false)}
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all hover-lift" style={{ color: 'var(--foreground)' }}>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowAddClient(false)} className="btn btn-secondary flex-1">
                 Cancel
               </button>
-              <button onClick={handleAddClient}
-                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 text-sm bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-lg sm:rounded-xl hover:shadow-lg transition-all hover-lift-ultra font-semibold">
-                Add Client
+              <button onClick={handleAddClient} className="btn btn-primary flex-1">
+                Create Client
               </button>
             </div>
           </div>
