@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { Users, Plus, Search, Copy, Mail, Trash2, BookOpen, Clock, TrendingUp, CheckCircle, Loader2, BarChart3 } from 'lucide-react';
+import { Users, Plus, Search, Copy, Mail, Trash2, BookOpen, Clock, TrendingUp, CheckCircle, Loader2, BarChart3, RefreshCw } from 'lucide-react';
+import ClientCard from './ClientCard';
+import toast from 'react-hot-toast';
 
 interface Client {
   id: string;
@@ -18,219 +20,184 @@ interface Client {
 
 interface Props {
   clients: Client[];
-  onSelectClient: (id: string) => void;
+  onSelectClient: (client: Client) => void;
   onAddClient: () => void;
   onDeleteClient: (id: string) => void;
-  onCopyLink: (link: string) => void;
-  onSendEmail: (email: string, link: string) => void;
-  selectedClientId: string | null;
+  onRefresh: () => void;
 }
 
-const sportEmoji: Record<string, string> = {
-  baseball: '⚾', football: '🏈', basketball: '🏀',
-  cricket: '🏏', boxing: '🥊', athletics: '🏃', tennis: '🎾', other: '🏆'
-};
-
-const statusConfig = {
-  active:    { label: 'Active',    cls: 'badge-blue' },
-  completed: { label: 'Completed', cls: 'badge-green' },
-  pending:   { label: 'Pending',   cls: 'badge-gray' },
-};
-
-export default function PublisherDashboard({ clients, onSelectClient, onAddClient, onDeleteClient, onCopyLink, onSendEmail }: Props) {
+export default function PublisherDashboard({ clients, onSelectClient, onAddClient, onDeleteClient, onRefresh }: Props) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'active' | 'completed' | 'pending'>('all');
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const filtered = clients.filter(c => {
-    const q = search.toLowerCase();
-    const matchSearch = c.name.toLowerCase().includes(q) || c.bookTitle.toLowerCase().includes(q);
-    const matchFilter = filter === 'all' || c.status === filter;
-    return matchSearch && matchFilter;
+    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
+                          c.bookTitle.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = filter === 'all' || c.status === filter;
+    return matchesSearch && matchesFilter;
   });
 
-  const avgProgress = clients.length > 0
-    ? Math.round(clients.reduce((s, c) => s + c.progress, 0) / clients.length)
-    : 0;
+  const stats = {
+    total: clients.length,
+    active: clients.filter(c => c.status === 'active').length,
+    completed: clients.filter(c => c.status === 'completed').length,
+    totalWords: clients.reduce((sum, c) => sum + (c.wordCount || 0), 0),
+    avgProgress: clients.length > 0 
+      ? Math.round(clients.reduce((sum, c) => sum + (c.progress || 0), 0) / clients.length)
+      : 0
+  };
 
-  const stats = [
-    { label: 'Total', value: clients.length, icon: Users, color: '#5b5bd6' },
-    { label: 'Active', value: clients.filter(c => c.status === 'active').length, icon: TrendingUp, color: '#16a34a' },
-    { label: 'Done', value: clients.filter(c => c.status === 'completed').length, icon: CheckCircle, color: '#7c3aed' },
-    { label: 'Avg Progress', value: `${avgProgress}%`, icon: BarChart3, color: '#d97706' },
-  ];
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await onRefresh();
+    setRefreshing(false);
+    toast.success('Dashboard refreshed');
+  };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    if (!confirm('Delete this client and all their data?')) return;
-    setDeletingId(id);
-    await onDeleteClient(id);
-    setDeletingId(null);
+  const handleCopyLink = (link: string) => {
+    navigator.clipboard.writeText(link);
+    toast.success('Interview link copied!');
+  };
+
+  const handleSendEmail = (email: string, link: string) => {
+    const subject = encodeURIComponent('Your Book Interview Link');
+    const body = encodeURIComponent(`Dear Client,\n\nHere is your personal interview link to start your book journey:\n\n${link}\n\nClick the link to begin your interview. The AI will guide you through telling your story.\n\nBest regards,\nYour Publisher`);
+    window.open(`mailto:${email}?subject=${subject}&body=${body}`);
+    toast.success('Email client opened');
   };
 
   return (
-    <div className="h-full flex flex-col" style={{ background: 'var(--bg)' }}>
-
-      {/* ── HEADER ── */}
-      <div className="flex-shrink-0 px-6 pt-6 pb-5" style={{ borderBottom: '1px solid var(--border)' }}>
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <h1 className="text-display" style={{ color: 'var(--fg)' }}>Clients</h1>
-            <p className="text-small mt-1" style={{ color: 'var(--fg-muted)' }}>
-              {clients.length === 0 ? 'No clients yet' : `${clients.length} client${clients.length !== 1 ? 's' : ''}`}
-            </p>
-          </div>
-          <button onClick={onAddClient} className="btn btn-primary">
-            <Plus size={15} />
-            New Client
-          </button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Clients</h1>
+          <p className="text-sm text-gray-500">Manage your authors and their books</p>
         </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {stats.map((s, i) => (
-            <div key={i} className="stat-card">
-              <div className="flex items-center justify-between mb-3">
-                <span className="stat-label">{s.label}</span>
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: `${s.color}18` }}>
-                  <s.icon size={14} style={{ color: s.color }} />
-                </div>
-              </div>
-              <div className="stat-value">{s.value}</div>
-            </div>
-          ))}
+        <div className="flex gap-2">
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all"
+          >
+            <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
+          </button>
+          <button
+            onClick={onAddClient}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all"
+          >
+            <Plus size={18} />
+            Add Client
+          </button>
         </div>
       </div>
 
-      {/* ── TOOLBAR ── */}
-      <div className="flex-shrink-0 px-6 py-3 flex flex-col sm:flex-row gap-3"
-        style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-subtle)' }}>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-2">
+            <Users size={18} className="text-indigo-600" />
+            <span className="text-xs text-gray-500">Total</span>
+          </div>
+          <p className="text-2xl font-bold">{stats.total}</p>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-2">
+            <TrendingUp size={18} className="text-green-600" />
+            <span className="text-xs text-gray-500">Active</span>
+          </div>
+          <p className="text-2xl font-bold">{stats.active}</p>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-2">
+            <CheckCircle size={18} className="text-purple-600" />
+            <span className="text-xs text-gray-500">Completed</span>
+          </div>
+          <p className="text-2xl font-bold">{stats.completed}</p>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-2">
+            <BookOpen size={18} className="text-orange-600" />
+            <span className="text-xs text-gray-500">Total Words</span>
+          </div>
+          <p className="text-2xl font-bold">{stats.totalWords.toLocaleString()}</p>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-2">
+            <BarChart3 size={18} className="text-blue-600" />
+            <span className="text-xs text-gray-500">Avg Progress</span>
+          </div>
+          <p className="text-2xl font-bold">{stats.avgProgress}%</p>
+        </div>
+      </div>
+
+      {/* Search & Filter */}
+      <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--fg-faint)' }} />
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search clients or books..."
-            className="input input-search"
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name or book title..."
+            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
-        <div className="flex gap-1.5">
+        
+        <div className="flex gap-2">
           {(['all', 'active', 'completed', 'pending'] as const).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`btn ${filter === f ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ padding: '7px 12px', fontSize: '12px' }}
+              className={`px-4 py-2 rounded-lg capitalize transition-all ${
+                filter === f
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+              }`}
             >
-              {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+              {f}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ── GRID ── */}
-      <div className="flex-1 overflow-y-auto p-6" style={{ background: 'var(--bg-subtle)' }}>
-        {filtered.length === 0 ? (
-          <div className="empty-state h-full">
-            <div className="empty-icon">
-              <Users size={24} style={{ color: 'var(--fg-faint)' }} />
-            </div>
-            <h3 className="text-heading mb-1" style={{ color: 'var(--fg)' }}>
-              {search ? 'No results' : 'No clients yet'}
-            </h3>
-            <p className="text-small mb-5" style={{ color: 'var(--fg-muted)' }}>
-              {search ? 'Try a different search term' : 'Add your first client to get started'}
-            </p>
-            {!search && (
-              <button onClick={onAddClient} className="btn btn-primary">
-                <Plus size={14} /> Add Client
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-            {filtered.map((client, idx) => (
-              <div
-                key={client.id}
-                onClick={() => onSelectClient(client.id)}
-                className="card card-interactive p-5 group animate-fadeUp"
-                style={{ animationDelay: `${idx * 30}ms` }}
-              >
-                {/* Top Row */}
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-                    style={{ background: 'var(--accent-subtle)' }}>
-                    {sportEmoji[client.sport || 'other'] || '🏆'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-heading truncate group-hover:text-[var(--accent)] transition-colors"
-                      style={{ color: 'var(--fg)' }}>
-                      {client.name}
-                    </h3>
-                    <p className="text-small truncate mt-0.5" style={{ color: 'var(--fg-muted)' }}>
-                      {client.bookTitle}
-                    </p>
-                  </div>
-                  <span className={`badge flex-shrink-0 ${statusConfig[client.status].cls}`}>
-                    {statusConfig[client.status].label}
-                  </span>
-                </div>
-
-                {/* Progress */}
-                <div className="mb-4">
-                  <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-small" style={{ color: 'var(--fg-muted)' }}>
-                      {client.wordCount.toLocaleString()} words
-                    </span>
-                    <span className="text-small font-semibold" style={{ color: 'var(--accent)' }}>
-                      {client.progress}%
-                    </span>
-                  </div>
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${client.progress}%` }} />
-                  </div>
-                </div>
-
-                {/* Bottom Row */}
-                <div className="flex items-center justify-between pt-3"
-                  style={{ borderTop: '1px solid var(--border)' }}>
-                  <span className="flex items-center gap-1.5 text-small" style={{ color: 'var(--fg-faint)' }}>
-                    <Clock size={11} />
-                    {new Date(client.lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={e => { e.stopPropagation(); onCopyLink(client.uniqueLink); }}
-                      className="btn btn-ghost btn-icon"
-                      title="Copy link">
-                      <Copy size={13} />
-                    </button>
-                    <button
-                      onClick={e => { e.stopPropagation(); onSendEmail(client.email, client.uniqueLink); }}
-                      className="btn btn-ghost btn-icon"
-                      style={{ color: 'var(--success)' }}
-                      title="Send email">
-                      <Mail size={13} />
-                    </button>
-                    <button
-                      onClick={e => handleDelete(e, client.id)}
-                      className="btn btn-ghost btn-icon"
-                      style={{ color: 'var(--danger)' }}
-                      title="Delete">
-                      {deletingId === client.id
-                        ? <Loader2 size={13} className="animate-spin" />
-                        : <Trash2 size={13} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Clients Grid */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+          <Users size={48} className="mx-auto mb-4 text-gray-400" />
+          <h3 className="text-lg font-medium mb-2">No clients found</h3>
+          <p className="text-sm text-gray-500 mb-4">
+            {search ? 'Try a different search term' : 'Add your first client to get started'}
+          </p>
+          {!search && (
+            <button
+              onClick={onAddClient}
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all"
+            >
+              <Plus size={16} className="inline mr-2" />
+              Add Client
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map(client => (
+            <ClientCard
+              key={client.id}
+              client={client}
+              onSelect={() => onSelectClient(client)}
+              onCopyLink={() => handleCopyLink(client.uniqueLink)}
+              onSendEmail={() => handleSendEmail(client.email, client.uniqueLink)}
+              onDelete={() => onDeleteClient(client.id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

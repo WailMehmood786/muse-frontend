@@ -1,297 +1,91 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ClientInterview from '@/components/ClientInterview';
-import { VoiceAgent } from '@/utils/voiceAgent';
 
-type Message = {
-  role: 'user' | 'ai';
-  text: string;
-};
+type Message = { role: 'user' | 'ai'; text: string };
 
-type PageProps = {
-  params: Promise<{ clientId: string }>
-};
+type PageProps = { params: Promise<{ clientId: string }> };
 
 export default function ClientInterviewPage({ params }: PageProps) {
-  const unwrappedParams = React.use(params);
-  const clientId = unwrappedParams.clientId;
-  
-  // Backend URL helper
+  const { clientId } = React.use(params);
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://muse-backend-production-29cd.up.railway.app';
-  
+
   const [client, setClient] = useState<any>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isVoiceActive, setIsVoiceActive] = useState(false);
-  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [bookDraft, setBookDraft] = useState<string>('');
+  const [bookDraft, setBookDraft] = useState('');
 
-  const voiceAgentRef = useRef<VoiceAgent | null>(null);
-
-  // Dynamic welcome message - AI will guide the conversation naturally
-  const getWelcomeMessage = (clientName: string) => {
-    return `Hey ${clientName}, thanks for sitting down with me. Let's start from the beginning - tell me about where you grew up.`;
-  };
-
-  // Initialize Voice Agent
+  // Load client data
   useEffect(() => {
-    voiceAgentRef.current = new VoiceAgent({
-      onListeningChange: setIsListening,
-      onSpeakingChange: setIsSpeaking,
-      onTranscript: setInput,
-      onFinalTranscript: (text) => {
-        handleSend(text);
-      },
-      onError: (error) => {
-        console.error('Voice error:', error);
-      }
-    });
-
-    // Configure voice agent
-    voiceAgentRef.current.setSilenceMs(2500); // 2.5 seconds for better accuracy
-    voiceAgentRef.current.setLanguage('en-US');
-    voiceAgentRef.current.setVoice({ rate: 0.92, pitch: 1.05, volume: 1.0 });
-
-    return () => {
-      voiceAgentRef.current?.stop();
-    };
-  }, []);
-
-  // Load client data from URL parameters or backend/localStorage
-  useEffect(() => {
-    const loadClient = async () => {
-      // First, ALWAYS try to load from localStorage
-      const savedClients = localStorage.getItem('muse_clients');
-      if (savedClients) {
-        const clients = JSON.parse(savedClients);
-        const existingClient = clients.find((c: any) => c.id === clientId);
-        if (existingClient) {
-          console.log('✅ Found existing client in localStorage with', existingClient.messages?.length || 0, 'messages');
-          setClient(existingClient);
-          if (existingClient.messages) setMessages(existingClient.messages);
-          if (existingClient.bookDraft) setBookDraft(existingClient.bookDraft);
-          if (existingClient.sessionId) setSessionId(existingClient.sessionId);
-          return; // Exit early - we found the client
+    const load = async () => {
+      // 1. Try localStorage first (has existing messages)
+      const saved = localStorage.getItem('muse_clients');
+      if (saved) {
+        const clients = JSON.parse(saved);
+        const found = clients.find((c: any) => c.id === clientId);
+        if (found) {
+          setClient(found);
+          if (found.messages?.length) setMessages(found.messages);
+          if (found.bookDraft) setBookDraft(found.bookDraft);
+          return;
         }
       }
-      
-      // Try backend next
+
+      // 2. Try backend
       try {
         const res = await axios.get(`${BACKEND_URL}/api/clients/${clientId}`);
         if (res.data.success) {
-          console.log('✅ Found client in backend with', res.data.client.messages?.length || 0, 'messages');
-          const clientData = res.data.client;
-          setClient(clientData);
-          if (clientData.messages) setMessages(clientData.messages);
-          if (clientData.bookDraft) setBookDraft(clientData.bookDraft);
-          if (clientData.sessionId) setSessionId(clientData.sessionId);
-          return; // Exit early - we found the client
+          const c = res.data.client;
+          setClient(c);
+          if (c.messages?.length) setMessages(c.messages);
+          if (c.bookDraft) setBookDraft(c.bookDraft);
+          return;
         }
-      } catch (error) {
-        console.log('⚠️ Backend unavailable, checking URL parameters');
-      }
-      
-      // Finally, try to get from URL parameters (for new clients)
+      } catch {}
+
+      // 3. Build from URL params
       const urlParams = new URLSearchParams(window.location.search);
-      const nameFromUrl = urlParams.get('name');
-      const bookFromUrl = urlParams.get('book');
-      const sportFromUrl = urlParams.get('sport');
-      
-      if (nameFromUrl && bookFromUrl) {
-        console.log('📝 Creating new client from URL parameters');
-        const clientData = {
+      const name = urlParams.get('name');
+      const book = urlParams.get('book');
+      const sport = urlParams.get('sport');
+
+      if (name && book) {
+        setClient({
           id: clientId,
-          name: decodeURIComponent(nameFromUrl),
-          email: '',
-          bookTitle: decodeURIComponent(bookFromUrl),
-          sport: sportFromUrl || 'baseball',
-          uniqueLink: window.location.href,
-          publisherId: 'publisher_1',
-          sessionId: null,
-          lastActive: new Date().toISOString(),
-          status: 'pending' as const,
-          progress: 0,
+          name: decodeURIComponent(name),
+          bookTitle: decodeURIComponent(book),
+          sport: sport || 'baseball',
           messages: [],
           bookDraft: '',
-          wordCount: 0
-        };
-        setClient(clientData);
-        return;
+          wordCount: 0,
+          status: 'pending'
+        });
       }
-      
-      // Client not found anywhere
-      console.log('❌ Client not found');
-      setClient(null);
     };
-    loadClient();
+    load();
   }, [clientId]);
 
-  // Save messages to backend and localStorage - IMMEDIATE SAVE
+  // Save to localStorage whenever messages change
   useEffect(() => {
-    const saveToBackend = async () => {
-      if (client && messages.length > 0) {
-        const wordCount = bookDraft.split(/\s+/).filter((w: string) => w.length > 0).length;
-        const progress = Math.min(Math.floor(wordCount / 50), 100);
-        
-        // ALWAYS save to localStorage IMMEDIATELY (primary backup)
-        const savedClients = localStorage.getItem('muse_clients');
-        let clients = savedClients ? JSON.parse(savedClients) : [];
-        
-        // Find and update or add client
-        const clientIndex = clients.findIndex((c: any) => c.id === client.id);
-        const updatedClient = {
-          ...client,
-          messages,
-          bookDraft,
-          sessionId,
-          lastActive: new Date().toISOString(),
-          wordCount,
-          progress,
-          status: wordCount >= 5000 ? 'completed' : 'active'
-        };
-        
-        if (clientIndex >= 0) {
-          clients[clientIndex] = updatedClient;
-        } else {
-          clients.push(updatedClient);
-        }
-        
-        localStorage.setItem('muse_clients', JSON.stringify(clients));
-        console.log('✅ SAVED to localStorage:', messages.length, 'messages,', wordCount, 'words');
-        
-        // Try to sync with backend (secondary)
-        try {
-          await axios.put(`${BACKEND_URL}/api/clients/${client.id}`, {
-            messages,
-            bookDraft,
-            sessionId,
-            wordCount,
-            progress,
-            status: wordCount >= 5000 ? 'completed' : 'active'
-          });
-          console.log('✅ Synced to backend');
-        } catch (error) {
-          console.log('⚠️ Backend sync failed (saved locally)');
-        }
-      }
-    };
-    
-    // Save immediately when messages change
-    if (messages.length > 0) {
-      saveToBackend();
-    }
-  }, [messages, bookDraft, sessionId, client]);
-
-  // Handle Send Message
-  const handleSend = async (textToSend: string) => {
-    if (!textToSend.trim() || loading) return;
-
-    // Stop listening while processing
-    if (voiceAgentRef.current && isListening) {
-      voiceAgentRef.current.stopListening();
-    }
-
-    const newMsgs: Message[] = [...messages, { role: 'user', text: textToSend }];
-    setMessages(newMsgs);
-    setInput('');
-    setLoading(true);
-
-    try {
-      const athleteSport = client?.sport || 'general';
-      
-      const res = await axios.post(`${BACKEND_URL}/api/chat`, {
-        message: textToSend,
-        userId: client?.id || null,
-        history: messages,
-        sessionId: sessionId,
-        mode: 'Creative',
-        sport: athleteSport
-      });
-      
-      // Use the AI response directly (it's already in Kelly Cole style from backend)
-      const aiReply = res.data.reply || "Tell me more about that.";
-
-      const updatedMsgs: Message[] = [...newMsgs, { role: 'ai', text: aiReply }];
-      setMessages(updatedMsgs);
-      
-      const newDraftContent = `**${client?.name || 'User'}:** ${textToSend}\n\n**Interviewer:** ${aiReply}`;
-      setBookDraft(prev => prev ? prev + "\n\n---\n\n" + newDraftContent : newDraftContent);
-
-      // Speak AI response if voice is active
-      if (voiceAgentRef.current?.isVoiceActive()) {
-        voiceAgentRef.current.enqueueSpeak(aiReply);
-        voiceAgentRef.current.completeProcessing();
-      }
-
-      if (!sessionId) setSessionId(res.data.sessionId);
-    } catch (err) {
-      const errorMsg = "Connection issue. Please try again.";
-      setMessages([...newMsgs, { role: 'ai', text: errorMsg }]);
-      if (voiceAgentRef.current?.isVoiceActive()) {
-        voiceAgentRef.current.speak(errorMsg);
-        voiceAgentRef.current.completeProcessing();
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Voice Agent Controls
-  const toggleVoiceAgent = () => {
-    if (isVoiceActive) {
-      voiceAgentRef.current?.stop();
-      setIsVoiceActive(false);
-    } else {
-      // If interview already started, just activate voice without welcome message
-      if (messages.length > 0) {
-        voiceAgentRef.current?.start(); // No welcome message, just start listening
-        setIsVoiceActive(true);
-      } else {
-        // First time - speak welcome message
-        const welcomeMsg = getWelcomeMessage(client?.name || 'there');
-        voiceAgentRef.current?.start(welcomeMsg);
-        setIsVoiceActive(true);
-        setMessages([{ role: 'ai', text: welcomeMsg }]);
-      }
-    }
-  };
-
-  const toggleListening = () => {
-    if (isListening) {
-      voiceAgentRef.current?.stopListening();
-    } else {
-      voiceAgentRef.current?.startListening();
-    }
-  };
-
-  const handleSpeak = (text: string, index: number) => {
-    if (speakingIndex === index) {
-      window.speechSynthesis.cancel();
-      setSpeakingIndex(null);
-    } else {
-      setSpeakingIndex(index);
-      voiceAgentRef.current?.speak(text, () => setSpeakingIndex(null));
-    }
-  };
-
-  const wordCount = bookDraft.split(/\s+/).filter(w => w.length > 0).length;
+    if (!client || messages.length === 0) return;
+    const saved = localStorage.getItem('muse_clients');
+    const clients = saved ? JSON.parse(saved) : [];
+    const idx = clients.findIndex((c: any) => c.id === clientId);
+    const updated = { ...client, messages, bookDraft, lastActive: new Date().toISOString() };
+    if (idx >= 0) clients[idx] = updated;
+    else clients.push(updated);
+    localStorage.setItem('muse_clients', JSON.stringify(clients));
+  }, [messages, bookDraft]);
 
   if (!client) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 p-4">
-        <div className="text-center max-w-md glass-card rounded-2xl p-8">
-          <div className="w-20 h-20 mx-auto mb-6 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center">
-            <span className="text-4xl">⚠️</span>
-          </div>
-          <h2 className="text-2xl font-bold mb-3 text-gradient-animate">Invalid Interview Link</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            This interview link is not valid or has expired. Please contact your publisher for a new link.
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-subtle)' }}>
+        <div className="text-center max-w-sm card p-8">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h2 className="text-title mb-2" style={{ color: 'var(--fg)' }}>Invalid Link</h2>
+          <p className="text-body" style={{ color: 'var(--fg-muted)' }}>
+            This interview link is not valid. Please contact your publisher for a new link.
           </p>
         </div>
       </div>
@@ -299,26 +93,22 @@ export default function ClientInterviewPage({ params }: PageProps) {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
-      {/* Interview Component - No separate header, let ClientInterview handle it */}
+    <div className="h-screen" style={{ background: 'var(--bg)' }}>
       <ClientInterview
-        clientName={client.name}
-        bookTitle={client.bookTitle}
-        messages={messages}
-        input={input}
-        loading={loading}
-        isListening={isListening}
-        isSpeaking={isSpeaking}
-        isVoiceActive={isVoiceActive}
-        wordCount={wordCount}
-        bookDraft={bookDraft}
-        onSend={handleSend}
-        onInputChange={setInput}
-        onToggleVoice={toggleVoiceAgent}
-        onToggleListening={toggleListening}
-        onSpeak={handleSpeak}
-        speakingIndex={speakingIndex}
-        isPublisher={false}
+        client={{
+          id: client.id,
+          name: client.name,
+          bookTitle: client.bookTitle,
+          sport: client.sport,
+          messages,
+          bookDraft,
+          wordCount: bookDraft.split(/\s+/).filter(w => w.length > 0).length,
+          status: 'active'
+        }}
+        onUpdate={(updates) => {
+          if (updates.messages) setMessages(updates.messages as Message[]);
+          if (updates.bookDraft !== undefined) setBookDraft(updates.bookDraft as string);
+        }}
       />
     </div>
   );

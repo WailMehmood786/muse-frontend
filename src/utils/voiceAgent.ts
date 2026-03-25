@@ -1,4 +1,4 @@
-// Voice Agent - ChatGPT Style: Auto-listens after AI speaks
+// Voice Agent with improved reliability and error handling
 
 export class VoiceAgent {
   private recognition: any = null;
@@ -10,11 +10,13 @@ export class VoiceAgent {
   private speakQueue: string[] = [];
   private silenceTimer: NodeJS.Timeout | null = null;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private retryCount: number = 0;
+  private maxRetries: number = 3;
   
   // Settings
-  private silenceTimeout: number = 2500; // 2.5 seconds - even more time to finish speaking
-  private voiceRate: number = 0.9;
-  private voicePitch: number = 1.0;
+  private silenceTimeout: number = 2000;
+  private voiceRate: number = 0.92;
+  private voicePitch: number = 1.05;
   private voiceVolume: number = 1.0;
   private voiceLang: string = 'en-US';
   private preferredVoiceName: string | null = null;
@@ -47,7 +49,7 @@ export class VoiceAgent {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
-      this.onError('Speech recognition not supported in this browser');
+      this.onError('Speech recognition is not supported in this browser');
       return;
     }
 
@@ -57,10 +59,10 @@ export class VoiceAgent {
     this.recognition.lang = this.voiceLang;
     this.recognition.maxAlternatives = 1;
 
-    // Recognition event handlers
     this.recognition.onstart = () => {
       this.isListening = true;
       this.onListeningChange(true);
+      this.retryCount = 0;
     };
 
     this.recognition.onend = () => {
@@ -70,26 +72,21 @@ export class VoiceAgent {
       // Auto-restart if voice is active and not speaking
       if (this.isActive && !this.isSpeaking && !this.isProcessing) {
         setTimeout(() => {
-          if (this.isActive && !this.isSpeaking && !this.isProcessing) {
+          if (this.isActive && !this.isSpeaking && !this.isProcessing && !this.isListening) {
             this.startListening();
           }
-        }, 100);
+        }, 500);
       }
     };
 
     let finalTranscript = '';
-    let lastProcessedTranscript = ''; // Track what we already processed
+    let lastProcessedTranscript = '';
     let processingTimeout: NodeJS.Timeout | null = null;
-    let lastProcessedTime = 0; // Track when we last processed
+    let lastProcessedTime = 0;
 
     this.recognition.onresult = (event: any) => {
-      // Clear any existing timers
-      if (this.silenceTimer) {
-        clearTimeout(this.silenceTimer);
-      }
-      if (processingTimeout) {
-        clearTimeout(processingTimeout);
-      }
+      if (this.silenceTimer) clearTimeout(this.silenceTimer);
+      if (processingTimeout) clearTimeout(processingTimeout);
 
       let interimTranscript = '';
       
@@ -103,46 +100,35 @@ export class VoiceAgent {
         }
       }
 
-      // Update with current transcript
       const currentText = (finalTranscript + ' ' + interimTranscript).trim();
       this.onTranscript(currentText);
 
-      // Set silence timer for final transcript - only if we have new content
       this.silenceTimer = setTimeout(() => {
         const trimmedTranscript = finalTranscript.trim();
         const now = Date.now();
         
-        // Only process if:
-        // 1. We have text
-        // 2. It's different from last processed
-        // 3. Not currently processing
-        // 4. Has minimum length (avoid single words)
-        // 5. At least 2 seconds since last processing (prevent rapid duplicates)
         if (trimmedTranscript && 
             trimmedTranscript !== lastProcessedTranscript && 
             !this.isProcessing &&
             trimmedTranscript.length > 3 &&
-            (now - lastProcessedTime) > 2000) {
+            (now - lastProcessedTime) > 1500) {
           
           this.isProcessing = true;
           lastProcessedTranscript = trimmedTranscript;
           lastProcessedTime = now;
           
-          // Add extra delay before processing to ensure no duplicates
           processingTimeout = setTimeout(() => {
             this.onFinalTranscript(trimmedTranscript);
             finalTranscript = '';
             
-            // Stop listening after final transcript
             if (this.isListening) {
               this.stopListening();
             }
             
-            // Reset processing flag after longer delay
             setTimeout(() => {
               this.isProcessing = false;
-            }, 2000); // Increased from 1500ms to 2000ms
-          }, 500); // Increased from 300ms to 500ms
+            }, 1500);
+          }, 300);
         }
       }, this.silenceTimeout);
     };
@@ -151,24 +137,22 @@ export class VoiceAgent {
       console.log('Recognition error:', event.error);
       
       if (event.error === 'no-speech') {
-        // Ignore - just means user didn't speak
         return;
       }
       
-      this.onError(`Recognition error: ${event.error}`);
-      
-      // Restart on certain errors
-      if (['network', 'audio-capture', 'aborted'].includes(event.error)) {
+      if (event.error === 'network' && this.retryCount < this.maxRetries) {
+        this.retryCount++;
         setTimeout(() => {
           if (this.isActive && !this.isSpeaking) {
             this.startListening();
           }
         }, 1000);
+      } else if (event.error !== 'aborted') {
+        this.onError(`Recognition error: ${event.error}`);
       }
     };
   }
 
-  // Start voice agent
   start(welcomeMessage?: string) {
     this.isActive = true;
     
@@ -179,7 +163,6 @@ export class VoiceAgent {
     }
   }
 
-  // Stop voice agent completely
   stop() {
     this.isActive = false;
     this.stopListening();
@@ -187,79 +170,66 @@ export class VoiceAgent {
     this.speakQueue = [];
     this.isProcessing = false;
     
-    if (this.silenceTimer) {
-      clearTimeout(this.silenceTimer);
-    }
+    if (this.silenceTimer) clearTimeout(this.silenceTimer);
   }
 
-  // Start listening for user input
   startListening() {
-    if (!this.recognition || this.isSpeaking || !this.isActive) return;
+    if (!this.recognition || this.isSpeaking || !this.isActive || this.isListening) return;
     
     try {
       this.recognition.start();
     } catch (e) {
-      // Already started, ignore
+      // Already started or error
     }
   }
 
-  // Stop listening
   stopListening() {
     if (this.recognition && this.isListening) {
       try {
         this.recognition.stop();
       } catch (e) {
-        // Already stopped, ignore
+        // Already stopped
       }
     }
   }
 
-  // Speak text (AI response)
   speak(text: string, onComplete?: () => void) {
     if (!this.synthesis) {
       if (onComplete) onComplete();
       return;
     }
 
-    // Add to queue
     this.speakQueue.push(text);
     
-    // Start processing queue if not already
     if (!this.isSpeaking) {
-      this.processQueue();
+      this.processQueue(onComplete);
     }
   }
 
-  private processQueue() {
+  private processQueue(onComplete?: () => void) {
     if (this.speakQueue.length === 0 || !this.isActive) {
       this.isSpeaking = false;
       this.onSpeakingChange(false);
       
-      // ✅ AUTO-RESUME LISTENING after speaking (ChatGPT style)
       if (this.isActive && !this.isProcessing) {
-        setTimeout(() => {
-          this.startListening();
-        }, 300);
+        setTimeout(() => this.startListening(), 200);
       }
+      if (onComplete) onComplete();
       return;
     }
 
     this.isSpeaking = true;
     this.onSpeakingChange(true);
-    
-    // Stop listening while speaking
     this.stopListening();
 
     const text = this.speakQueue.shift()!;
     const utterance = new SpeechSynthesisUtterance(this.cleanText(text));
     
-    // Configure voice
     utterance.rate = this.voiceRate;
     utterance.pitch = this.voicePitch;
     utterance.volume = this.voiceVolume;
     utterance.lang = this.voiceLang;
 
-    // Get best available voice
     const voices = this.synthesis.getVoices();
     const preferredVoice = (this.preferredVoiceName
       ? voices.find(v => v.name === this.preferredVoiceName)
@@ -268,28 +238,20 @@ export class VoiceAgent {
         (v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Karen'))
       ) || voices.find(v => v.lang.startsWith('en'));
     
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
-    }
+    if (preferredVoice) utterance.voice = preferredVoice;
 
     utterance.onend = () => {
-      // Process next in queue
-      setTimeout(() => {
-        this.processQueue();
-      }, 100);
+      setTimeout(() => this.processQueue(onComplete), 100);
     };
 
     utterance.onerror = () => {
-      setTimeout(() => {
-        this.processQueue();
-      }, 100);
+      setTimeout(() => this.processQueue(onComplete), 100);
     };
 
     this.currentUtterance = utterance;
     this.synthesis.speak(utterance);
   }
 
-  // Stop speaking
   stopSpeaking() {
     if (this.synthesis) {
       this.synthesis.cancel();
@@ -299,7 +261,6 @@ export class VoiceAgent {
     this.onSpeakingChange(false);
   }
 
-  // Enqueue multiple texts
   enqueueSpeak(text: string) {
     this.speakQueue.push(text);
     if (!this.isSpeaking && this.isActive) {
@@ -307,17 +268,14 @@ export class VoiceAgent {
     }
   }
 
-  // Mark processing complete (for final transcript)
   completeProcessing() {
     this.isProcessing = false;
   }
 
-  // Check if voice is active
   isVoiceActive(): boolean {
     return this.isActive;
   }
 
-  // Clean text for TTS
   private cleanText(text: string): string {
     return text
       .replace(/[*_~`#\[\]]/g, '')
@@ -328,7 +286,6 @@ export class VoiceAgent {
       .trim();
   }
 
-  // Settings
   setSilenceMs(ms: number) {
     this.silenceTimeout = Math.max(500, Math.min(3000, ms));
   }
@@ -344,11 +301,10 @@ export class VoiceAgent {
     if (options.rate !== undefined) this.voiceRate = options.rate;
     if (options.pitch !== undefined) this.voicePitch = options.pitch;
     if (options.volume !== undefined) this.voiceVolume = options.volume;
-    if (options.name !== undefined) this.preferredVoiceName = options.name || null;
+    if (options.name !== undefined) this.preferredVoiceName = options.name;
   }
 }
 
-// Helper to check support
 export function checkVoiceSupport() {
   const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
   return {
