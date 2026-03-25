@@ -116,45 +116,34 @@ export default function Home() {
   }, []);
 
   const loadClientsFromBackend = async () => {
-    try {
-      const token = localStorage.getItem('muse_publisher_token');
-      
-      if (!token) {
-        console.log('No token found, loading from localStorage');
-        const savedClients = localStorage.getItem('muse_clients');
-        if (savedClients) {
-          setClients(JSON.parse(savedClients));
-        }
-        return;
-      }
+    // Load localStorage first (instant display)
+    const savedClients = localStorage.getItem('muse_clients');
+    if (savedClients) {
+      try { setClients(JSON.parse(savedClients)); } catch {}
+    }
 
-      console.log('Loading clients from backend with token');
-      
+    // Then sync with backend
+    const token = localStorage.getItem('muse_publisher_token');
+    if (!token) return;
+
+    try {
       const res = await axios.get(`${BACKEND_URL}/api/clients?publisherId=publisher_1`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Authorization': `Bearer ${token}` },
+        timeout: 8000
       });
-      
       if (res.data.success) {
-        console.log(`✅ Loaded ${res.data.clients.length} clients from backend`);
-        setClients(res.data.clients);
-        localStorage.setItem('muse_clients', JSON.stringify(res.data.clients));
+        const backendClients: Client[] = res.data.clients;
+        const localClients: Client[] = savedClients ? JSON.parse(savedClients) : [];
+        // Keep local-only clients (not yet synced to backend)
+        const backendIds = new Set(backendClients.map((c: Client) => c.id));
+        const localOnly = localClients.filter(c => !backendIds.has(c.id));
+        const merged = [...backendClients, ...localOnly];
+        setClients(merged);
+        localStorage.setItem('muse_clients', JSON.stringify(merged));
+        console.log(`✅ Synced: ${backendClients.length} backend + ${localOnly.length} local clients`);
       }
     } catch (error: any) {
-      console.error('Backend unavailable:', error?.response?.data || error.message);
-      
-      if (error?.response?.status === 401) {
-        console.log('Token expired, clearing auth');
-        localStorage.removeItem('muse_publisher_token');
-      }
-      
-      // Fallback to localStorage
-      const savedClients = localStorage.getItem('muse_clients');
-      if (savedClients) {
-        setClients(JSON.parse(savedClients));
-      }
+      console.error('Backend sync failed, using localStorage:', error?.response?.data || error.message);
     }
   };
 
@@ -286,23 +275,18 @@ export default function Home() {
     );
     
     setClients(updatedClients);
-    
-    // Save to backend first (primary storage)
+    localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
+
+    const token = localStorage.getItem('muse_publisher_token');
     try {
       await axios.put(`${BACKEND_URL}/api/clients/${clientId}`, {
-        messages: msgs,
-        bookDraft: draft,
-        wordCount,
-        progress,
+        messages: msgs, bookDraft: draft, wordCount, progress,
         status: progress >= 100 ? 'completed' : 'active'
+      }, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
-      // Sync to localStorage as backup
-      localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
-      console.log('✅ Client data saved to backend');
     } catch (error: any) {
-      console.error('Backend save failed, using localStorage:', error);
-      // Fallback: save to localStorage only
-      localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
+      console.error('Backend save failed (saved locally):', error?.response?.data || error.message);
     }
   };
 
@@ -447,26 +431,30 @@ export default function Home() {
 
   const handleSelectClient = (clientId: string) => setSelectedClientId(clientId);
   const handleDeleteClient = async (clientId: string) => {
-    if (confirm('Delete this client and all their data?')) {
-      const updatedClients = clients.filter(c => c.id !== clientId);
-      setClients(updatedClients);
-      
-      if (selectedClientId === clientId) {
-        setSelectedClientId(null);
-        setMessages([]);
-        setBookDraft('');
-      }
-      
-      // Delete from backend first
+    if (!confirm('Delete this client and all their data?')) return;
+
+    // Remove from state immediately (optimistic update)
+    const updatedClients = clients.filter(c => c.id !== clientId);
+    setClients(updatedClients);
+    localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
+
+    if (selectedClientId === clientId) {
+      setSelectedClientId(null);
+      setMessages([]);
+      setBookDraft('');
+    }
+
+    // Try backend delete
+    const token = localStorage.getItem('muse_publisher_token');
+    if (token) {
       try {
-        await axios.delete(`${BACKEND_URL}/api/clients/${clientId}`);
+        await axios.delete(`${BACKEND_URL}/api/clients/${clientId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
         console.log('✅ Client deleted from backend');
-      } catch (error) {
-        console.error('Backend delete failed:', error);
+      } catch (error: any) {
+        console.error('Backend delete failed (deleted locally):', error?.response?.data || error.message);
       }
-      
-      // Update localStorage as backup
-      localStorage.setItem('muse_clients', JSON.stringify(updatedClients));
     }
   };
 
@@ -569,17 +557,37 @@ export default function Home() {
 
       <main className="flex-1 overflow-hidden">
         {selectedClientId ? (
-          <ClientInterview
-            clientName={clients.find(c => c.id === selectedClientId)?.name || ''}
-            bookTitle={clients.find(c => c.id === selectedClientId)?.bookTitle || ''}
-            messages={messages} input={input} loading={loading}
-            isListening={isListening} isSpeaking={isSpeaking} isVoiceActive={isVoiceActive}
-            wordCount={wordCount} bookDraft={bookDraft}
-            onSend={handleSend} onInputChange={setInput}
-            onToggleVoice={toggleVoiceAgent} onToggleListening={toggleListening}
-            onSpeak={handleSpeak} speakingIndex={speakingIndex}
-            isPublisher={true}
-          />
+          <div className="h-full flex flex-col">
+            {/* Publisher interview top bar - back + logout */}
+            <div className="h-12 sm:h-14 bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-3 sm:px-5 flex-shrink-0">
+              <button onClick={() => { setSelectedClientId(null); setMessages([]); setBookDraft(''); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                ← Dashboard
+              </button>
+              <div className="flex items-center gap-1">
+                <button onClick={toggleTheme} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all" style={{ color: 'var(--foreground)' }}>
+                  {theme === 'light' ? <Moon size={15} /> : <Sun size={15} />}
+                </button>
+                <button onClick={handleLogout} className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all text-sm font-semibold" style={{ color: 'var(--foreground)' }}>
+                  <LogOut size={14} />
+                  <span className="hidden sm:inline">Logout</span>
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <ClientInterview
+                clientName={clients.find(c => c.id === selectedClientId)?.name || ''}
+                bookTitle={clients.find(c => c.id === selectedClientId)?.bookTitle || ''}
+                messages={messages} input={input} loading={loading}
+                isListening={isListening} isSpeaking={isSpeaking} isVoiceActive={isVoiceActive}
+                wordCount={wordCount} bookDraft={bookDraft}
+                onSend={handleSend} onInputChange={setInput}
+                onToggleVoice={toggleVoiceAgent} onToggleListening={toggleListening}
+                onSpeak={handleSpeak} speakingIndex={speakingIndex}
+                isPublisher={true}
+              />
+            </div>
+          </div>
         ) : (
           <PublisherDashboard
             clients={clients} onSelectClient={handleSelectClient}
